@@ -22,8 +22,9 @@ public final class CharacterStateService {
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (BukkitObjectOutputStream out = new BukkitObjectOutputStream(bytes)) {
-                out.writeObject(player.getInventory().getContents());
+                out.writeObject(player.getInventory().getStorageContents());
                 out.writeObject(player.getInventory().getArmorContents());
+                out.writeObject(player.getInventory().getExtraContents());
                 out.writeObject(player.getEnderChest().getContents());
                 out.writeFloat(player.getExp());
                 out.writeInt(player.getLevel());
@@ -60,6 +61,7 @@ public final class CharacterStateService {
         try (BukkitObjectInputStream in = new BukkitObjectInputStream(new ByteArrayInputStream(data))) {
             ItemStack[] inventory = (ItemStack[]) in.readObject();
             ItemStack[] armor = (ItemStack[]) in.readObject();
+            ItemStack[] extra = (ItemStack[]) in.readObject();
             ItemStack[] ender = (ItemStack[]) in.readObject();
             float exp = in.readFloat();
             int level = in.readInt();
@@ -70,8 +72,9 @@ public final class CharacterStateService {
             double x = in.readDouble(), y = in.readDouble(), z = in.readDouble();
             float yaw = in.readFloat(), pitch = in.readFloat();
 
-            player.getInventory().setContents(inventory);
+            player.getInventory().setStorageContents(inventory);
             player.getInventory().setArmorContents(armor);
+            player.getInventory().setExtraContents(extra);
             player.getEnderChest().setContents(ender);
             player.setExp(Math.max(0, Math.min(1, exp)));
             player.setLevel(Math.max(0, level));
