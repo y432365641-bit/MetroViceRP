@@ -1,12 +1,13 @@
-# Resource Pack Integration
+# Metro Vice RP Resource Pack Integration
 
 ## Java Edition
-The Java pack is a resource pack foundation. Paper's ResourcePackService sends a hosted ZIP using its HTTPS URL and SHA-1. Configure `resource-pack.enabled`, `resource-pack.url`, and `resource-pack.sha1` in the plugin config, then use `/mvrp reload` and `/mvrp pack`.
+The Java pack contains item models/textures for the phone, radio, EMS medical bag, police MDT laptop, and rank-management laptop. Paper's resource-pack service sends the Java ZIP using a direct HTTPS URL and its SHA-1. Configure `resource-pack.enabled`, `resource-pack.url`, and `resource-pack.sha1` in the plugin config.
 
-The pack alone cannot create interactive phone/radio/bank screens. The plugin must implement the menus and draw matching glyphs/assets. Those menu handlers are still pending.
+## Bedrock / Geyser
+Install `MetroViceRP-Bedrock.mcpack` in `plugins/Geyser-Spigot/packs/` and `MetroViceRP.json` in `plugins/Geyser-Spigot/custom_mappings/`. Enable Geyser custom content in its configuration and restart the server. Geyser does not automatically convert Java packs or generate item mappings, so both the Bedrock pack and mappings are required.
 
-## Bedrock / mobile
-Bedrock uses a separate `.mcpack` layout. A Java pack cannot be used as a Bedrock pack. Native Bedrock UI requires a Bedrock-side UI/add-on and a compatible Geyser/Floodgate integration; the current Bedrock files are only the resource foundation.
+## Plugin-connected systems
+The phone opens character identity, bank balance, messaging/social screens, gallery/location snapshot, settings, custom inventory, police MDT shortcut, radio, and EMS emergency screens. The police rank manager is a separate laptop, restricted to on-duty officers at rank Lieutenant (ملازم) or above. The EMS medical bag can revive a nearby downed player only when its holder is an on-duty EMS member.
 
 ## Release criteria
-Do not mark the pack final until both archives are built, their hashes are recorded, delivery is tested on Java and Bedrock clients, and each corresponding plugin interface is tested in-game.
+A successful build confirms compilation and packaging only. Mark the pack final after testing the item appearances and plugin interactions on both Java and Bedrock clients. Preserve `plugins/MetroViceRP/metrovice.db` when updating.
