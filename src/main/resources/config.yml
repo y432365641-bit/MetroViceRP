@@ -1,0 +1,11 @@
+# Metro Vice RP core configuration
+settings:
+  max-characters-per-player: 3
+  min-character-age: 18
+  max-character-age: 80
+  character-name-min-length: 3
+  character-name-max-length: 16
+messages:
+  prefix: "&8[&bMetro &dVice&8] &r"
+  character-created: "&aتم إنشاء شخصيتك بنجاح."
+  no-character: "&cليس لديك شخصية محددة. استخدم /character list."
