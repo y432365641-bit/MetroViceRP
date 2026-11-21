@@ -33,7 +33,7 @@ public final class MdtMenuService {
         Inventory inv = Bukkit.createInventory(new MdtMenuHolder("main"), 45, "§1§lMETRO VICE §8| §bPOLICE MDT");
         inv.setItem(20, item(Material.PLAYER_HEAD, "§bسجل المناوبين", "§7عرض أفراد الشرطة على رأس عملهم"));
         inv.setItem(22, item(Material.COMPASS, "§dالبحث عن مواطن", "§7بحث بالاسم أو رقم الهوية"));
-        inv.setItem(24, item(Material.WRITABLE_BOOK, "§eإدارة الرتب", "§7عرض التسلسل وترقية الأفراد"));
+        inv.setItem(24, item(Material.LECTERN, "§7إدارة الرتب", "§8تتم من حاسوب الرتب المنفصل"));
         inv.setItem(40, item(Material.BARRIER, "§cإغلاق", "§7إغلاق واجهة MDT"));
         player.openInventory(inv);
     }
@@ -57,7 +57,7 @@ public final class MdtMenuService {
 
     private void renderRoster(Inventory inv) throws SQLException {
         inv.clear();
-        List<DepartmentService.RosterMember> roster = departments.roster("POLICE").stream().filter(DepartmentService.RosterMember::onDuty).toList();
+        List<DepartmentService.RosterMember> roster = departments.roster("POLICE").stream().toList();
         int slot = 0;
         for (DepartmentService.RosterMember member : roster) {
             if (slot >= 45) break;
