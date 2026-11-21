@@ -4,7 +4,7 @@ settings:
   min-character-age: 18
   max-character-age: 80
   character-name-min-length: 3
-  character-name-max-length: 16
+  character-name-max-length: 32
 messages:
   prefix: "&8[&bMetro &dVice&8] &r"
   character-created: "&aتم إنشاء شخصيتك بنجاح."
