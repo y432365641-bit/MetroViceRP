@@ -55,25 +55,30 @@ public final class DepartmentService {
             ps.setInt(1, characterId); ps.setString(2, dept);
             if (ps.executeUpdate() == 0) throw new IllegalArgumentException("الشخصية ليست موظفة في هذا القسم.");
         }
+        String remainingDepartment = null;
+        String remainingRank = null;
         try (PreparedStatement ps = database.connection().prepareStatement(
                 "SELECT department, rank_name FROM department_memberships WHERE character_id=? LIMIT 1")) {
             ps.setInt(1, characterId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    String remaining = rs.getString("department");
-                    try (PreparedStatement update = database.connection().prepareStatement(
-                            "UPDATE characters SET job=?, rank_name=? WHERE character_id=?")) {
-                        update.setString(1, remaining.equals("POLICE") ? "الشرطة" : "الإسعاف");
-                        update.setString(2, rs.getString("rank_name"));
-                        update.setInt(3, characterId);
-                        update.executeUpdate();
-                    }
-                } else {
-                    try (PreparedStatement update = database.connection().prepareStatement(
-                            "UPDATE characters SET job='مواطن', rank_name='مواطن' WHERE character_id=?")) {
-                        update.setInt(1, characterId); update.executeUpdate();
-                    }
+                    remainingDepartment = rs.getString("department");
+                    remainingRank = rs.getString("rank_name");
                 }
+            }
+        }
+        if (remainingDepartment == null) {
+            try (PreparedStatement update = database.connection().prepareStatement(
+                    "UPDATE characters SET job='مواطن', rank_name='مواطن' WHERE character_id=?")) {
+                update.setInt(1, characterId); update.executeUpdate();
+            }
+        } else {
+            try (PreparedStatement update = database.connection().prepareStatement(
+                    "UPDATE characters SET job=?, rank_name=? WHERE character_id=?")) {
+                update.setString(1, remainingDepartment.equals("POLICE") ? "الشرطة" : "الإسعاف");
+                update.setString(2, remainingRank);
+                update.setInt(3, characterId);
+                update.executeUpdate();
             }
         }
     }
