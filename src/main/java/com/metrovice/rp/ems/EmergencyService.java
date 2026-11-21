@@ -33,9 +33,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class EmergencyService implements Listener, CommandExecutor {
-    private static final long DOWNED_SECONDS = 60L;
-    private static final double MEDIC_RANGE = 48.0;
-    private static final double REVIVE_RANGE = 5.0;
     private final JavaPlugin plugin;
     private final DepartmentService departments;
     private final CharacterService characters;
@@ -79,7 +76,7 @@ public final class EmergencyService implements Listener, CommandExecutor {
     }
 
     private void enterDowned(Player player) {
-        long until = System.currentTimeMillis() / 1000L + DOWNED_SECONDS;
+        long until = System.currentTimeMillis() / 1000L + downedSeconds();
         downedUntil.put(player.getUniqueId(), until);
         bleedoutReady.put(player.getUniqueId(), false);
         player.setHealth(Math.min(2.0, player.getMaxHealth()));
@@ -125,10 +122,14 @@ public final class EmergencyService implements Listener, CommandExecutor {
         }
     }
 
+    private long downedSeconds() { return Math.max(1L, plugin.getConfig().getLong("ems.downed-seconds", 60L)); }
+    private double medicRange() { return Math.max(1.0, plugin.getConfig().getDouble("ems.medic-nearby-radius", 48.0)); }
+    private double reviveRange() { return Math.max(1.0, plugin.getConfig().getDouble("ems.revive-radius", 5.0)); }
+
     private boolean hasNearbyMedic(Player patient) {
         for (Player candidate : Bukkit.getOnlinePlayers()) {
             if (candidate.equals(patient) || !candidate.getWorld().equals(patient.getWorld())) continue;
-            if (candidate.getLocation().distanceSquared(patient.getLocation()) > MEDIC_RANGE * MEDIC_RANGE) continue;
+            if (candidate.getLocation().distanceSquared(patient.getLocation()) > medicRange() * medicRange()) continue;
             try {
                 if (departments.isOnDuty(candidate.getUniqueId(), "EMS")) return true;
             } catch (SQLException ex) {
@@ -227,7 +228,7 @@ public final class EmergencyService implements Listener, CommandExecutor {
             return;
         }
         Player nearest = null;
-        double best = REVIVE_RANGE * REVIVE_RANGE;
+        double best = reviveRange() * reviveRange();
         for (UUID id : downedUntil.keySet()) {
             Player candidate = Bukkit.getPlayer(id);
             if (candidate == null || !candidate.getWorld().equals(medic.getWorld())) continue;
@@ -235,7 +236,7 @@ public final class EmergencyService implements Listener, CommandExecutor {
             if (distance <= best) { nearest = candidate; best = distance; }
         }
         if (nearest == null) {
-            medic.sendMessage(MetroViceRP.color("&eلا يوجد مصاب قريب منك ضمن 5 بلوكات."));
+            medic.sendMessage(MetroViceRP.color("&eلا يوجد مصاب قريب منك ضمن " + reviveRange() + " بلوكات."));
             return;
         }
         revive(nearest, medic);
