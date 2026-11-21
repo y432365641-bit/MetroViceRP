@@ -29,8 +29,13 @@ public final class CharacterService {
             throw new IllegalArgumentException("الاسم يجب أن يكون بين " + minLength + " و" + maxLength + " أحرف، ويسمح بالحروف والمسافات والأرقام وشرطة الاسم.");
         if (list(owner).size() >= maxCharacters) throw new IllegalArgumentException("وصلت للحد الأقصى للشخصيات (" + maxCharacters + ").");
         try (PreparedStatement ps = database.connection().prepareStatement(
-                "INSERT INTO characters(owner_uuid, character_name, age) VALUES(?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, owner.toString()); ps.setString(2, name); ps.setInt(3, age); ps.executeUpdate();
+                "INSERT INTO characters(owner_uuid, character_name, age, job, rank_name, cash, bank) VALUES(?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, owner.toString()); ps.setString(2, name); ps.setInt(3, age);
+            ps.setString(4, plugin.getConfig().getString("settings.default-job", "مواطن"));
+            ps.setString(5, plugin.getConfig().getString("settings.default-rank", "مواطن"));
+            ps.setLong(6, Math.max(0, plugin.getConfig().getLong("settings.starting-cash", 500)));
+            ps.setLong(7, Math.max(0, plugin.getConfig().getLong("settings.starting-bank", 0)));
+            ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) return find(owner, keys.getInt(1)).orElseThrow();
             }
