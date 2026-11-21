@@ -143,6 +143,16 @@ public final class DepartmentService {
         }
     }
 
+    public boolean isOnDuty(UUID owner, String department) throws SQLException {
+        String dept = normalizeDepartment(department);
+        int characterId = activeCharacter(owner).id();
+        try (PreparedStatement ps = database.connection().prepareStatement(
+                "SELECT on_duty FROM department_memberships WHERE character_id=? AND department=?")) {
+            ps.setInt(1, characterId); ps.setString(2, dept);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next() && rs.getInt(1) == 1; }
+        }
+    }
+
     public List<DutyMember> onDuty(String department) throws SQLException {
         String dept = normalizeDepartment(department);
         List<DutyMember> result = new ArrayList<>();
