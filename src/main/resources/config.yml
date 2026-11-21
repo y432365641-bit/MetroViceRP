@@ -35,3 +35,11 @@ departments:
     - "جندي"
     - "متدرب"
   ems-ranks: []
+
+resource-pack:
+  enabled: false
+  url: ""
+  sha1: ""
+  required: false
+  auto-send-on-join: true
+  prompt: "Metro Vice RP - حزمة الموارد الرسمية"
