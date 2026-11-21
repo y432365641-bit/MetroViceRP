@@ -117,21 +117,41 @@ public final class DeviceService implements Listener {
             case "gallery" -> {if(slot==49)openPhone(p);else if(isPhoto(e.getCurrentItem()))p.sendMessage(MetroViceRP.color("&eتفاصيل اللقطة ظاهرة في وصف العنصر."));}
             case "social" -> {if(slot==22)openPhone(p);else if(slot==13)ask(p,Input.POST,"&dاكتب منشورك على M (حتى 120 حرفًا):");}
             case "settings" -> {if(slot==11){notifications.put(p.getUniqueId(),!notifications.getOrDefault(p.getUniqueId(),true));openSettings(p);}else if(slot==13)ask(p,Input.SET_PIN,"&7اكتب رمزًا من 4 أرقام أو OFF لإلغاء الرمز:");else if(slot==22)openPhone(p);}
+            case "phoneinfo" -> {if(slot==22)openPhone(p);}
         }
     }
     private void identity(Player p){
-        try{CharacterProfile c=characters.active(p.getUniqueId()).orElse(null);if(c==null){p.sendMessage(MetroViceRP.color("&cلا توجد شخصية نشطة."));return;}
-            p.sendMessage(MetroViceRP.color("&8&m------ &bبطاقة الهوية &8&m------"));
-            p.sendMessage(MetroViceRP.color("&fالاسم: &b"+c.name()));p.sendMessage(MetroViceRP.color("&fالعمر: &b"+c.age()));
-            p.sendMessage(MetroViceRP.color("&fرقم الهوية: &bMV-"+c.id()));p.sendMessage(MetroViceRP.color("&fالوظيفة: &b"+c.job()));
-            p.sendMessage(MetroViceRP.color("&fالرتبة: &b"+c.rank()));p.sendMessage(MetroViceRP.color("&8&m--------------------------"));
-        }catch(SQLException ex){plugin.getLogger().warning("Phone identity lookup failed: "+ex.getMessage());p.sendMessage(MetroViceRP.color("&cتعذر تحميل الهوية."));}
+        try{
+            CharacterProfile c=characters.active(p.getUniqueId()).orElse(null);
+            if(c==null){openInfo(p,"§bبطاقة الهوية","§cلا توجد شخصية نشطة.");return;}
+            openInfo(p,"§bبطاقة الهوية",
+                    "§fالاسم: §b"+c.name(),
+                    "§fالعمر: §b"+c.age(),
+                    "§fرقم الهوية: §bMV-"+c.id(),
+                    "§fالوظيفة: §b"+c.job(),
+                    "§fالرتبة: §b"+c.rank());
+        }catch(SQLException ex){plugin.getLogger().warning("Phone identity lookup failed: "+ex.getMessage());openInfo(p,"§bبطاقة الهوية","§cتعذر تحميل الهوية.");}
     }
     private void bank(Player p){
-        try{CharacterProfile c=characters.active(p.getUniqueId()).orElse(null);if(c==null){p.sendMessage(MetroViceRP.color("&cفعّل شخصية أولًا."));return;}
-            p.sendMessage(MetroViceRP.color("&8&m------ &6محفظتي &8&m------"));p.sendMessage(MetroViceRP.color("&fالنقد: &a$"+c.cash()));
-            p.sendMessage(MetroViceRP.color("&fالبنك: &b$"+c.bank()));p.sendMessage(MetroViceRP.color("&7الإيداع والسحب عند موظف البنك."));
-        }catch(SQLException ex){plugin.getLogger().warning("Phone balance lookup failed: "+ex.getMessage());p.sendMessage(MetroViceRP.color("&cتعذر تحميل الرصيد."));}
+        try{
+            CharacterProfile c=characters.active(p.getUniqueId()).orElse(null);
+            if(c==null){openInfo(p,"§6المحفظة","§cفعّل شخصية أولًا.");return;}
+            openInfo(p,"§6المحفظة",
+                    "§fالنقد: §a$"+c.cash(),
+                    "§fرصيد البنك: §b$"+c.bank(),
+                    "§7الإيداع والسحب من موظف البنك.");
+        }catch(SQLException ex){plugin.getLogger().warning("Phone balance lookup failed: "+ex.getMessage());openInfo(p,"§6المحفظة","§cتعذر تحميل الرصيد.");}
+    }
+    private void openInfo(Player p,String title,String... lines){
+        DeviceMenuHolder h=new DeviceMenuHolder("phoneinfo");
+        Inventory inv=Bukkit.createInventory(h,27,"§1METRO VICE §8| "+title);h.inventory(inv);
+        int slot=10;
+        for(String line:lines){
+            if(slot>16)break;
+            inv.setItem(slot++,button(Material.PAPER,"&f"+line,"&7بيانات محفوظة في ملف شخصيتك"));
+        }
+        inv.setItem(22,button(Material.ARROW,"&eرجوع للهاتف"));
+        p.openInventory(inv);
     }
     private void photo(Player p){
         ItemStack item=new ItemStack(Material.FILLED_MAP);ItemMeta meta=item.getItemMeta();meta.setDisplayName(MetroViceRP.color("&eلقطة MetroCam"));
