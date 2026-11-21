@@ -36,6 +36,17 @@ departments:
     - "متدرب"
   ems-ranks: []
 
+inventory:
+  max-weight-kg: 30.0
+  item-weights:
+    DIAMOND: 0.1
+    IRON_INGOT: 0.1
+    GOLD_INGOT: 0.1
+    STONE: 0.2
+    COBBLESTONE: 0.2
+    OAK_LOG: 0.5
+    COOKED_BEEF: 0.2
+
 resource-pack:
   enabled: false
   url: ""
