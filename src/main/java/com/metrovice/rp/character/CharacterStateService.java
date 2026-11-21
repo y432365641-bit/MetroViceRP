@@ -37,8 +37,8 @@ public final class CharacterStateService {
                 out.writeFloat(loc.getYaw()); out.writeFloat(loc.getPitch());
             }
             try (PreparedStatement ps = database.connection().prepareStatement("""
-                INSERT INTO character_state(character_id, state_data, updated_at) VALUES(?,?,CURRENT_TIMESTAMP)
-                ON CONFLICT(character_id) DO UPDATE SET state_data=excluded.state_data, updated_at=CURRENT_TIMESTAMP
+                INSERT INTO character_state(character_id, state_data, state_version, updated_at) VALUES(?,?,2,CURRENT_TIMESTAMP)
+                ON CONFLICT(character_id) DO UPDATE SET state_data=excluded.state_data, state_version=2, updated_at=CURRENT_TIMESTAMP
                 """)) {
                 ps.setInt(1, characterId); ps.setBytes(2, bytes.toByteArray()); ps.executeUpdate();
             }
@@ -49,10 +49,11 @@ public final class CharacterStateService {
 
     public void load(Player player, int characterId) throws SQLException {
         byte[] data = null;
+        int version = 1;
         try (PreparedStatement ps = database.connection().prepareStatement(
-                "SELECT state_data FROM character_state WHERE character_id=?")) {
+                "SELECT state_data, state_version FROM character_state WHERE character_id=?")) {
             ps.setInt(1, characterId);
-            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) data = rs.getBytes(1); }
+            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) { data = rs.getBytes("state_data"); version = rs.getInt("state_version"); } }
         }
         if (data == null) {
             clearPlayerState(player);
@@ -61,7 +62,7 @@ public final class CharacterStateService {
         try (BukkitObjectInputStream in = new BukkitObjectInputStream(new ByteArrayInputStream(data))) {
             ItemStack[] inventory = (ItemStack[]) in.readObject();
             ItemStack[] armor = (ItemStack[]) in.readObject();
-            ItemStack[] extra = (ItemStack[]) in.readObject();
+            ItemStack[] extra = version >= 2 ? (ItemStack[]) in.readObject() : null;
             ItemStack[] ender = (ItemStack[]) in.readObject();
             float exp = in.readFloat();
             int level = in.readInt();
@@ -72,9 +73,13 @@ public final class CharacterStateService {
             double x = in.readDouble(), y = in.readDouble(), z = in.readDouble();
             float yaw = in.readFloat(), pitch = in.readFloat();
 
-            player.getInventory().setStorageContents(inventory);
+            if (version >= 2) {
+                player.getInventory().setStorageContents(inventory);
+                player.getInventory().setExtraContents(extra);
+            } else {
+                player.getInventory().setContents(inventory);
+            }
             player.getInventory().setArmorContents(armor);
-            player.getInventory().setExtraContents(extra);
             player.getEnderChest().setContents(ender);
             player.setExp(Math.max(0, Math.min(1, exp)));
             player.setLevel(Math.max(0, level));
