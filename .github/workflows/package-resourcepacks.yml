@@ -1,0 +1,26 @@
+name: Package MetroViceRP Resource Packs
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'resourcepacks/**'
+      - '.github/workflows/package-resourcepacks.yml'
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package Java Edition
+        run: cd resourcepacks/java && zip -r ../../MetroViceRP-Java.zip .
+      - name: Package Bedrock Edition
+        run: cd resourcepacks/bedrock && zip -r ../../MetroViceRP-Bedrock.mcpack .
+      - name: Calculate SHA-1
+        run: sha1sum MetroViceRP-Java.zip MetroViceRP-Bedrock.mcpack | tee RESOURCEPACK-SHA1.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MetroViceRP-ResourcePacks
+          path: |
+            MetroViceRP-Java.zip
+            MetroViceRP-Bedrock.mcpack
+            RESOURCEPACK-SHA1.txt
