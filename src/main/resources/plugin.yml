@@ -1,7 +1,9 @@
 name: MetroViceRP
-version: 0.9.0
+version: 0.9.1
 main: com.metrovice.rp.MetroViceRP
 api-version: '1.21'
+load: STARTUP
+loadbefore: [Geyser-Spigot]
 authors: [Metro Vice RP]
 description: Character-based roleplay framework for Metro Vice RP.
 commands:
