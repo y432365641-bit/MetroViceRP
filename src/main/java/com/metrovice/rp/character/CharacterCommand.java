@@ -26,6 +26,7 @@ public final class CharacterCommand implements CommandExecutor {
         try {
             switch (args[0].toLowerCase()) {
                 case "create" -> create(player, args);
+                case "menu" -> CharacterMenu.open(plugin, service, player);
                 case "list" -> list(player);
                 case "select" -> select(player, args);
                 case "info" -> info(player);
@@ -128,6 +129,7 @@ public final class CharacterCommand implements CommandExecutor {
         player.sendMessage(MetroViceRP.color("&8&m------ &bMetro Vice RP &8&m------"));
         player.sendMessage(MetroViceRP.color("&b/character create <name> <age> &7- إنشاء شخصية"));
         player.sendMessage(MetroViceRP.color("&b/character list &7- عرض شخصياتك"));
+        player.sendMessage(MetroViceRP.color("&b/character menu &7- فتح قائمة الشخصيات"));
         player.sendMessage(MetroViceRP.color("&b/character select <id> &7- تبديل الشخصية"));
         player.sendMessage(MetroViceRP.color("&b/character info &7- عرض ملف الشخصية"));
         player.sendMessage(MetroViceRP.color("&b/character rename <id> <name> &7- تغيير الاسم"));
