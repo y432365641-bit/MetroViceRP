@@ -66,6 +66,15 @@ public final class BankNpcListener implements Listener {
             plugin.getLogger().warning("Bank employee world is missing; use /mvrp banknpc to place the employee again.");
             return;
         }
+        Location location = new Location(Bukkit.getWorld(worldName),
+                plugin.getConfig().getDouble("bank.employee.x"),
+                plugin.getConfig().getDouble("bank.employee.y"),
+                plugin.getConfig().getDouble("bank.employee.z"),
+                (float) plugin.getConfig().getDouble("bank.employee.yaw"),
+                (float) plugin.getConfig().getDouble("bank.employee.pitch"));
+        // Load the saved chunk before checking its entity UUID, so an NPC in an
+        // otherwise-unloaded chunk is not duplicated after a restart.
+        location.getChunk().load();
         String savedId = plugin.getConfig().getString("bank.employee.uuid", "");
         if (savedId != null && !savedId.isBlank()) {
             try {
@@ -75,12 +84,6 @@ public final class BankNpcListener implements Listener {
                 plugin.getLogger().warning("Saved bank employee UUID is invalid; creating a replacement.");
             }
         }
-        Location location = new Location(Bukkit.getWorld(worldName),
-                plugin.getConfig().getDouble("bank.employee.x"),
-                plugin.getConfig().getDouble("bank.employee.y"),
-                plugin.getConfig().getDouble("bank.employee.z"),
-                (float) plugin.getConfig().getDouble("bank.employee.yaw"),
-                (float) plugin.getConfig().getDouble("bank.employee.pitch"));
         spawnEmployee(location);
     }
 
