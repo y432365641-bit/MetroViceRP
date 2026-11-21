@@ -1,7 +1,11 @@
 name: Package MetroViceRP Resource Packs
 on:
   push:
-    branches: [ main, feature/core-systems, feature/police-duty-ranks-resourcepack ]
+    branches:
+      - main
+      - feature/core-systems
+      - feature/police-duty-ranks-resourcepack
+      - feature/bedrock-geyser-api-pack-manager
     paths:
       - 'resourcepacks/**'
       - '.github/workflows/package-resourcepacks.yml'
@@ -19,8 +23,9 @@ jobs:
         run: sha1sum MetroViceRP-Java.zip MetroViceRP-Bedrock.mcpack | tee RESOURCEPACK-SHA1.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: MetroViceRP-ResourcePacks
+          name: MetroViceRP-ResourcePacks-0.9.3
           path: |
             MetroViceRP-Java.zip
             MetroViceRP-Bedrock.mcpack
             RESOURCEPACK-SHA1.txt
+          retention-days: 90
