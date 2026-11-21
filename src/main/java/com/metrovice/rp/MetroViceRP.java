@@ -12,6 +12,7 @@ import com.metrovice.rp.department.DutyCommand;
 import com.metrovice.rp.police.MdtCommand;
 import com.metrovice.rp.police.PoliceLaptopListener;
 import com.metrovice.rp.storage.Database;
+import com.metrovice.rp.resourcepack.ResourcePackService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -30,6 +31,7 @@ public final class MetroViceRP extends JavaPlugin {
     private BankNpcListener bankNpcListener;
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
+    private ResourcePackService resourcePackService;
 
     @Override
     public void onEnable() {
@@ -54,6 +56,8 @@ public final class MetroViceRP extends JavaPlugin {
         getServer().getPluginManager().registerEvents(bankNpcListener, this);
         Objects.requireNonNull(getCommand("duty")).setExecutor(new DutyCommand(this, departmentService));
         Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService));
+        resourcePackService = new ResourcePackService(this);
+        getServer().getPluginManager().registerEvents(resourcePackService, this);
         policeLaptop = new PoliceLaptopListener(this);
         getServer().getPluginManager().registerEvents(policeLaptop, this);
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates, departmentService), this);
@@ -101,6 +105,28 @@ public final class MetroViceRP extends JavaPlugin {
             sender.sendMessage(color("&7Police / EMS duty: &aonline"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
             sender.sendMessage(color("&8&m--------------------------------"));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("pack")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("This command must be used in-game.");
+                return true;
+            }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("send") && args.length == 3) {
+                if (!sender.hasPermission("metrovice.admin")) {
+                    sender.sendMessage(color("&cليس لديك صلاحية."));
+                    return true;
+                }
+                Player target = Bukkit.getPlayerExact(args[2]);
+                if (target == null) {
+                    sender.sendMessage(color("&cاللاعب غير متصل."));
+                    return true;
+                }
+                resourcePackService.send(target);
+                sender.sendMessage(color("&aتم إرسال طلب الحزمة إلى " + target.getName()));
+                return true;
+            }
+            resourcePackService.send(player);
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
@@ -250,7 +276,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc|mdt]"));
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|pack|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc|mdt]"));
         return true;
     }
 
