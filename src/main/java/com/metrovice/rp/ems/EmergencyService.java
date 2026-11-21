@@ -2,6 +2,8 @@ package com.metrovice.rp.ems;
 
 import com.metrovice.rp.MetroViceRP;
 import com.metrovice.rp.department.DepartmentService;
+import com.metrovice.rp.character.CharacterService;
+import com.metrovice.rp.inventory.InventoryService;
 import com.metrovice.rp.device.DeviceMenuHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -36,13 +38,17 @@ public final class EmergencyService implements Listener, CommandExecutor {
     private static final double REVIVE_RANGE = 5.0;
     private final JavaPlugin plugin;
     private final DepartmentService departments;
+    private final CharacterService characters;
+    private final InventoryService inventories;
     private final NamespacedKey medBagKey;
     private final Map<UUID, Long> downedUntil = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> bleedoutReady = new ConcurrentHashMap<>();
 
-    public EmergencyService(JavaPlugin plugin, DepartmentService departments) {
+    public EmergencyService(JavaPlugin plugin, DepartmentService departments, CharacterService characters, InventoryService inventories) {
         this.plugin = plugin;
         this.departments = departments;
+        this.characters = characters;
+        this.inventories = inventories;
         this.medBagKey = new NamespacedKey(plugin, "ems_medical_bag");
         Bukkit.getScheduler().runTaskTimer(plugin, this::tickDowned, 20L, 20L);
     }
@@ -250,6 +256,15 @@ public final class EmergencyService implements Listener, CommandExecutor {
 
     private void bleedout(Player player) {
         Location dropAt = player.getLocation();
+        try {
+            var active = characters.active(player.getUniqueId()).orElse(null);
+            if (active != null) inventories.dropAll(active.id(), dropAt);
+        } catch (SQLException ex) {
+            plugin.getLogger().severe("Could not drop saved bag contents for " + player.getName() + ": " + ex.getMessage());
+            player.sendMessage(MetroViceRP.color("&cتعذر إسقاط محتويات حقيبتك المحفوظة؛ لم يتم تنفيذ التحلل لحماية أغراضك."));
+            openEmergencyMenu(player);
+            return;
+        }
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType() != Material.AIR) dropAt.getWorld().dropItemNaturally(dropAt, item.clone());
         }
