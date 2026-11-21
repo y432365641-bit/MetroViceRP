@@ -12,9 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 /**
- * Installs the bundled resource packs into MetroViceRP's own data folder.
- * Geyser mappings are copied before Geyser initializes; the Bedrock pack
- * itself is registered through the supported Geyser API by the pack manager.
+ * Installs the bundled packs and places the Bedrock pack in Geyser's native
+ * packs directory before Geyser enables. Geyser then includes it in the
+ * initial Bedrock resource-pack handshake for every connecting player.
  */
 public final class EmbeddedGeyserPack {
     private EmbeddedGeyserPack() {}
@@ -23,20 +23,26 @@ public final class EmbeddedGeyserPack {
         Path plugins = plugin.getDataFolder().toPath().getParent();
         Path geyser = plugins.resolve("Geyser-Spigot");
         Path mappings = geyser.resolve("custom_mappings");
+        Path geyserPacks = geyser.resolve("packs");
         Path ownPacks = plugin.getDataFolder().toPath().resolve("resourcepacks");
         Path bedrockPack = ownPacks.resolve("MetroViceRP-Bedrock.mcpack");
+        Path geyserBedrockPack = geyserPacks.resolve("MetroViceRP-Bedrock.mcpack");
         Path javaPack = ownPacks.resolve("MetroViceRP-Java.zip");
 
         try {
             Files.createDirectories(ownPacks);
             Files.createDirectories(mappings);
+            Files.createDirectories(geyserPacks);
             copy(plugin, "embedded/MetroViceRP-Bedrock.mcpack", bedrockPack);
+            copy(plugin, "embedded/MetroViceRP-Bedrock.mcpack", geyserBedrockPack);
             copy(plugin, "embedded/MetroViceRP-Java.zip", javaPack);
             copy(plugin, "embedded/MetroViceRP.json", mappings.resolve("MetroViceRP.json"));
 
             String javaSha1 = sha1(javaPack);
             Files.writeString(ownPacks.resolve("MetroViceRP-Java-SHA1.txt"), javaSha1);
             plugin.getLogger().info("MetroViceRP Bedrock pack installed: " + bedrockPack.toAbsolutePath());
+            plugin.getLogger().info("MetroViceRP Bedrock pack registered in Geyser native packs folder: "
+                    + geyserBedrockPack.toAbsolutePath());
             plugin.getLogger().info("MetroViceRP Java pack installed: " + javaPack.toAbsolutePath());
             plugin.getLogger().info("MetroViceRP Java pack SHA-1: " + javaSha1);
             plugin.getLogger().info("MetroViceRP Geyser custom item mappings installed.");
