@@ -51,6 +51,7 @@ public final class EmergencyService implements Listener, CommandExecutor {
         ItemStack bag = new ItemStack(Material.CHEST);
         ItemMeta meta = bag.getItemMeta();
         meta.setDisplayName(MetroViceRP.color("&b&lحقيبة الإسعاف"));
+        meta.setCustomModelData(61001);
         meta.setLore(java.util.List.of(
                 MetroViceRP.color("&7معدات علاج مخصصة للمسعفين"),
                 MetroViceRP.color("&eاضغط بزر الفأرة الأيمن قرب مصاب لإنعاشه")));
