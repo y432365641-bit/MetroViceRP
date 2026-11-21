@@ -8,6 +8,9 @@ commands:
   mvrp:
     description: MetroViceRP core status and administration
     usage: /mvrp [info|reload|setjob|setrank]
+  mdt:
+    description: Police mobile data terminal
+    usage: /mdt [roster|search <name>]
   duty:
     description: Toggle police or EMS duty status
     usage: /duty [police|ems]
