@@ -52,7 +52,13 @@ public final class CharacterCommand implements CommandExecutor {
         String name = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length - 1));
         CharacterProfile profile = service.create(player.getUniqueId(), name, age);
         player.sendMessage(MetroViceRP.color("&aتم إنشاء الشخصية &f" + profile.name() + " &7(ID: " + profile.id() + ")"));
-        player.sendMessage(MetroViceRP.color("&7فعّلها باستخدام &b/character select " + profile.id()));
+        if (service.active(player.getUniqueId()).isEmpty()) {
+            service.select(player.getUniqueId(), profile.id());
+            states.load(player, profile.id());
+            player.sendMessage(MetroViceRP.color("&aتم تفعيل شخصيتك الأولى. أهلًا بك في المدينة!"));
+        } else {
+            player.sendMessage(MetroViceRP.color("&7لتفعيلها لاحقًا استخدم &b/character switch " + profile.id()));
+        }
     }
 
     private void list(Player player) throws SQLException {
