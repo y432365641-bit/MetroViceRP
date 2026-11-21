@@ -21,6 +21,12 @@ public final class MdtCommand implements CommandExecutor {
         this.plugin = plugin; this.characters = characters; this.departments = departments;
     }
 
+    private void sendCitizenRecord(Player player, CharacterProfile profile) {
+        player.sendMessage(MetroViceRP.color("&b" + profile.name() + " &7| رقم الهوية: &f" + profile.id()
+                + " &7| العمر: &f" + profile.age() + " &7| الوظيفة: &f" + profile.job()
+                + " &7| الرتبة: &f" + profile.rank()));
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
@@ -39,7 +45,7 @@ public final class MdtCommand implements CommandExecutor {
                 for (DepartmentService.DutyMember member : roster) {
                     player.sendMessage(MetroViceRP.color("&f" + member.characterName() + " &7- " + member.rank()));
                 }
-                player.sendMessage(MetroViceRP.color("&7للبحث عن هوية: &b/mdt search <name>"));
+                player.sendMessage(MetroViceRP.color("&7للبحث عن هوية: &b/mdt search <name|number>"));
                 return true;
             }
             if (args[0].equalsIgnoreCase("search")) {
@@ -48,17 +54,19 @@ public final class MdtCommand implements CommandExecutor {
                     return true;
                 }
                 String query = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
-                List<CharacterProfile> matches = characters.searchByName(query);
                 player.sendMessage(MetroViceRP.color("&8&m------ &bنتائج البحث &8&m------"));
-                if (matches.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا توجد نتائج."));
-                for (CharacterProfile profile : matches) {
-                    player.sendMessage(MetroViceRP.color("&b" + profile.name() + " &7| العمر: &f" + profile.age()
-                            + " &7| الوظيفة: &f" + profile.job() + " &7| الرتبة: &f" + profile.rank()
-                            + " &8| ID: " + profile.id()));
+                if (query.matches("\\d+")) {
+                    CharacterProfile profile = characters.findByIdentityNumber(Integer.parseInt(query)).orElse(null);
+                    if (profile == null) player.sendMessage(MetroViceRP.color("&7لا توجد هوية بهذا الرقم."));
+                    else sendCitizenRecord(player, profile);
+                } else {
+                    List<CharacterProfile> matches = characters.searchByName(query);
+                    if (matches.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا توجد نتائج."));
+                    for (CharacterProfile profile : matches) sendCitizenRecord(player, profile);
                 }
                 return true;
             }
-            player.sendMessage(MetroViceRP.color("&c/mdt [roster|search <name>]"));
+            player.sendMessage(MetroViceRP.color("&c/mdt [roster|search <name|number>]"));
         } catch (IllegalArgumentException ex) {
             player.sendMessage(MetroViceRP.color("&c" + ex.getMessage()));
         } catch (SQLException ex) {
