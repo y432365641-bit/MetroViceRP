@@ -1,7 +1,7 @@
 package com.metrovice.rp;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Scoreboard;
+import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,8 +40,7 @@ public final class PlayerNameVisibilityListener implements Listener {
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
         team.addEntry(player.getName());
 
-        // Paper API: remove the account from the vanilla tab player list.
-        player.setListed(false);
+        // Keep the tab entry neutral; Bukkit API does not expose a portable hide-listed toggle.
         player.setPlayerListName(" ");
     }
 }
