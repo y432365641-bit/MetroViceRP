@@ -7,7 +7,7 @@ description: Character-based roleplay framework for Metro Vice RP.
 commands:
   mvrp:
     description: MetroViceRP core status and administration
-    usage: /mvrp [info|reload|setjob|setrank]
+    usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop]
   mdt:
     description: Police mobile data terminal
     usage: /mdt [roster|search <name>]
