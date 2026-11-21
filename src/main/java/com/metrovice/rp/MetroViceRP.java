@@ -187,6 +187,13 @@ public final class MetroViceRP extends JavaPlugin {
             try {
                 String department = departmentService.normalizeDepartment(args[1]);
                 var members = departmentService.onDuty(department);
+                if (department.equals("POLICE")) {
+                    var rankOrder = getConfig().getStringList("departments.police-ranks");
+                    members.sort(java.util.Comparator.comparingInt(member -> {
+                        int index = rankOrder.indexOf(member.rank());
+                        return index < 0 ? Integer.MAX_VALUE : index;
+                    }));
+                }
                 sender.sendMessage(color("&8&m------ &b" + department + " - المناوبون &8&m------"));
                 if (members.isEmpty()) sender.sendMessage(color("&7لا يوجد أفراد على رأس عملهم حاليًا."));
                 for (var member : members) {
