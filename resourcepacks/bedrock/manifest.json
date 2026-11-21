@@ -3,11 +3,11 @@
   "header": {
     "name": "Metro Vice RP",
     "description": "Official Metro Vice RP Bedrock item textures",
-    "uuid": "0c40f53b-53d7-4d8b-8ea7-4e3d5b2a1f61",
+    "uuid": "6d7e2a91-8b43-4c15-9f62-3a7d8e1b5c40",
     "version": [
       0,
       3,
-      0
+      1
     ],
     "min_engine_version": [
       1,
@@ -18,12 +18,12 @@
   "modules": [
     {
       "type": "resources",
-      "uuid": "b29b2e88-84a1-4c88-83f6-8f0a76b7b3f2",
+      "uuid": "a91c5e73-2d84-4f06-b7a1-8c3e5d9f2046",
       "version": [
-      0,
-      3,
-      0
-    ]
+        0,
+        3,
+        1
+      ]
     }
   ]
 }
