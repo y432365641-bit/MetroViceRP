@@ -45,6 +45,21 @@ public final class CharacterMenu {
             inventory.setItem(slots[i], item);
         }
 
+        if (profiles.isEmpty()) {
+            ItemStack first = new ItemStack(Material.WRITABLE_BOOK);
+            ItemMeta firstMeta = first.getItemMeta();
+            firstMeta.setDisplayName(MetroViceRP.color("&aإنشاء شخصيتك الأولى"));
+            firstMeta.setLore(List.of(
+                    MetroViceRP.color("&7ابدأ حياتك في مدينة Metro Vice RP"),
+                    MetroViceRP.color("&eاكتب في الدردشة:"),
+                    MetroViceRP.color("&f/character create <name> <age>"),
+                    MetroViceRP.color("&7مثال: /character create Ahmed 25"),
+                    MetroViceRP.color("&8بعد الإنشاء سيتم تفعيلها تلقائيًا")
+            ));
+            first.setItemMeta(firstMeta);
+            inventory.setItem(13, first);
+        }
+
         ItemStack info = new ItemStack(Material.BOOK);
         ItemMeta infoMeta = info.getItemMeta();
         infoMeta.setDisplayName(MetroViceRP.color("&bإدارة الشخصيات"));
