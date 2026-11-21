@@ -181,7 +181,6 @@ public final class DeviceService implements Listener {
                 }catch(NumberFormatException ex){p.sendMessage(MetroViceRP.color("&cأدخل رقم تردد صحيح مثل 5.5 أو 10.25."));openRadio(p);}
             }}
         }
-    }
     private boolean hasPhone(Player p){for(ItemStack i:p.getInventory().getContents())if(i!=null&&i.hasItemMeta()&&i.getItemMeta().getPersistentDataContainer().has(phoneKey,PersistentDataType.BYTE))return true;return false;}
     public boolean sendRadioMessage(Player sender,String message){
         if(!hasRadio(sender)){sender.sendMessage(MetroViceRP.color("&cيجب أن تحمل الراديو لإرسال الرسائل."));return true;}
