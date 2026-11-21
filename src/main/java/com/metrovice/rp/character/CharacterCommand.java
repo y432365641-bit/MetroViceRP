@@ -22,8 +22,8 @@ public final class CharacterCommand implements CommandExecutor {
             sender.sendMessage("This command can only be used in-game.");
             return true;
         }
-        if (args.length == 0) { CharacterMenu.open(plugin, service, player); return true; }
         try {
+            if (args.length == 0) { CharacterMenu.open(plugin, service, player); return true; }
             switch (args[0].toLowerCase()) {
                 case "create" -> create(player, args);
                 case "menu" -> CharacterMenu.open(plugin, service, player);
