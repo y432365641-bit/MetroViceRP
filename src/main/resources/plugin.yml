@@ -1,0 +1,18 @@
+name: MetroViceRP
+version: 0.1.0
+main: com.metrovice.rp.MetroViceRP
+api-version: '1.21'
+authors: [Metro Vice RP]
+description: Core roleplay framework for Metro Vice RP.
+commands:
+  mvrp:
+    description: MetroViceRP main command
+    usage: /mvrp [info|reload]
+    permission: metrovice.admin
+  character:
+    description: Manage your roleplay characters
+    usage: /character <create|list|select|info>
+permissions:
+  metrovice.admin:
+    description: Manage MetroViceRP
+    default: op
