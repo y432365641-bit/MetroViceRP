@@ -143,6 +143,18 @@ public final class DepartmentService {
         }
     }
 
+    public void changeRankByCharacterId(int characterId, String department, String rank) throws SQLException {
+        String dept = normalizeDepartment(department);
+        String cleanRank = cleanRank(rank);
+        try (PreparedStatement ps = database.connection().prepareStatement("UPDATE department_memberships SET rank_name=? WHERE character_id=? AND department=?")) {
+            ps.setString(1, cleanRank); ps.setInt(2, characterId); ps.setString(3, dept);
+            if (ps.executeUpdate() == 0) throw new IllegalArgumentException("لا توجد عضوية بهذا الرقم في القسم.");
+        }
+        try (PreparedStatement ps = database.connection().prepareStatement("UPDATE characters SET rank_name=? WHERE character_id=?")) {
+            ps.setString(1, cleanRank); ps.setInt(2, characterId); ps.executeUpdate();
+        }
+    }
+
     public boolean isOnDuty(UUID owner, String department) throws SQLException {
         String dept = normalizeDepartment(department);
         int characterId = activeCharacter(owner).id();
