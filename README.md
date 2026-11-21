@@ -99,3 +99,5 @@ The project targets the Paper 26.3 API line and Java 25, matching the server det
 ## Planned modules
 
 Custom weighted inventory, phone and apps, police MDT and duty roster, EMS, civilian/government jobs, economy and NPC shops, radio integration, vehicles, housing, and audit logs. Each module will be added in a separate milestone and tested against the target server.
+
+<!-- CI verification checkpoint for current core-systems source. -->
