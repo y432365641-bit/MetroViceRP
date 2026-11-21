@@ -13,6 +13,9 @@ import com.metrovice.rp.police.MdtCommand;
 import com.metrovice.rp.police.PoliceLaptopListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.inventory.InventoryCommand;
+import com.metrovice.rp.inventory.InventoryListener;
+import com.metrovice.rp.inventory.InventoryService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,6 +35,7 @@ public final class MetroViceRP extends JavaPlugin {
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
     private ResourcePackService resourcePackService;
+    private InventoryService inventoryService;
 
     @Override
     public void onEnable() {
@@ -50,6 +54,9 @@ public final class MetroViceRP extends JavaPlugin {
         }
 
         Objects.requireNonNull(getCommand("character")).setExecutor(new CharacterCommand(this, characterService, characterStates));
+        inventoryService = new InventoryService(this, database);
+        Objects.requireNonNull(getCommand("inventory")).setExecutor(new InventoryCommand(this, characterService, inventoryService));
+        getServer().getPluginManager().registerEvents(new InventoryListener(this, inventoryService, characterService), this);
         Objects.requireNonNull(getCommand("mvrp")).setExecutor(this);
         Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
         bankNpcListener = new BankNpcListener(this, bankService);
@@ -102,6 +109,7 @@ public final class MetroViceRP extends JavaPlugin {
             sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.7.0"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
+            sender.sendMessage(color("&7Custom bag: &ephase 1"));
             sender.sendMessage(color("&7Banking: &aonline"));
             sender.sendMessage(color("&7Police / EMS duty: &aonline"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
