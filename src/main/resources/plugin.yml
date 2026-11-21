@@ -1,5 +1,5 @@
 name: MetroViceRP
-version: 0.5.0
+version: 0.6.0
 main: com.metrovice.rp.MetroViceRP
 api-version: '1.21'
 authors: [Metro Vice RP]
@@ -7,7 +7,7 @@ description: Character-based roleplay framework for Metro Vice RP.
 commands:
   mvrp:
     description: MetroViceRP core status and administration
-    usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop]
+    usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc]
   mdt:
     description: Police mobile data terminal
     usage: /mdt [roster|search <name>]
@@ -20,7 +20,7 @@ commands:
   character:
     aliases: [char]
     description: Create and manage isolated roleplay characters
-    usage: /character <create|list|select|info|rename|delete>
+    usage: /character [menu|create|list|switch|info|rename|delete]
 permissions:
   metrovice.admin:
     description: Manage MetroViceRP
