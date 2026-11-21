@@ -6,6 +6,7 @@ import com.metrovice.rp.character.CharacterService;
 import com.metrovice.rp.character.CharacterStateService;
 import com.metrovice.rp.economy.BankCommand;
 import com.metrovice.rp.economy.BankService;
+import com.metrovice.rp.economy.BankNpcListener;
 import com.metrovice.rp.department.DepartmentService;
 import com.metrovice.rp.department.DutyCommand;
 import com.metrovice.rp.police.MdtCommand;
@@ -26,6 +27,7 @@ public final class MetroViceRP extends JavaPlugin {
     private CharacterService characterService;
     private CharacterStateService characterStates;
     private BankService bankService;
+    private BankNpcListener bankNpcListener;
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
 
@@ -48,6 +50,8 @@ public final class MetroViceRP extends JavaPlugin {
         Objects.requireNonNull(getCommand("character")).setExecutor(new CharacterCommand(this, characterService, characterStates));
         Objects.requireNonNull(getCommand("mvrp")).setExecutor(this);
         Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
+        bankNpcListener = new BankNpcListener(this, bankService);
+        getServer().getPluginManager().registerEvents(bankNpcListener, this);
         Objects.requireNonNull(getCommand("duty")).setExecutor(new DutyCommand(this, departmentService));
         Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService));
         policeLaptop = new PoliceLaptopListener(this);
@@ -185,6 +189,13 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
+        if (args[0].equalsIgnoreCase("banknpc")) {
+            if (!sender.hasPermission("metrovice.admin")) { sender.sendMessage(color("&cليس لديك صلاحية.")); return true; }
+            if (!(sender instanceof Player player)) { sender.sendMessage("Only an in-game player can place the bank employee."); return true; }
+            bankNpcListener.spawnEmployee(player.getLocation());
+            player.sendMessage(color("&aتم إنشاء موظف البنك في موقعك. اضغط عليه لفتح حسابك."));
+            return true;
+        }
         if (args[0].equalsIgnoreCase("givelaptop")) {
             if (!sender.hasPermission("metrovice.admin")) {
                 sender.sendMessage(color("&cليس لديك صلاحية."));
@@ -239,7 +250,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|mdt]"));
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc|mdt]"));
         return true;
     }
 
