@@ -53,6 +53,19 @@ public final class Database {
                 )
                 """);
             ensureColumn("character_state", "state_version", "INTEGER NOT NULL DEFAULT 1");
+            statement.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS department_memberships (
+                  membership_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  character_id INTEGER NOT NULL,
+                  department TEXT NOT NULL,
+                  rank_name TEXT NOT NULL,
+                  on_duty INTEGER NOT NULL DEFAULT 0,
+                  duty_started_at INTEGER,
+                  total_duty_seconds INTEGER NOT NULL DEFAULT 0,
+                  UNIQUE(character_id, department),
+                  FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
+                )
+                """);
         }
     }
 
