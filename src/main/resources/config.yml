@@ -5,6 +5,10 @@ settings:
   max-character-age: 80
   character-name-min-length: 3
   character-name-max-length: 32
+  starting-cash: 500
+  starting-bank: 0
+  default-job: "مواطن"
+  default-rank: "مواطن"
 messages:
   prefix: "&8[&bMetro &dVice&8] &r"
   character-created: "&aتم إنشاء شخصيتك بنجاح."
