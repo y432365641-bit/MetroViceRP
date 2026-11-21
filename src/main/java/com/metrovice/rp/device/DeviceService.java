@@ -72,6 +72,9 @@ public final class DeviceService implements Listener {
         inv.setItem(14,button(Material.MAP,"&aلقطات الموقع","&7استعرض اللقطات المحفوظة"));
         inv.setItem(15,button(Material.PAPER,"&dM - التواصل الاجتماعي","&7آخر المنشورات وانشر تحديثًا"));
         inv.setItem(16,button(Material.COMPARATOR,"&7الإعدادات","&7الإشعارات ورمز قفل الهاتف"));
+        inv.setItem(18,button(Material.CHEST,"&aالحقيبة","&7فتح المخزون الشخصي"));
+        inv.setItem(19,button(Material.IRON_INGOT,"&9جهاز الشرطة MDT","&7لأفراد الشرطة المناوبين"));
+        inv.setItem(20,button(Material.GOAT_HORN,"&bالراديو","&7إعداد تردد جهاز الاتصال"));
         inv.setItem(22,button(Material.BARRIER,"&cإغلاق"));p.openInventory(inv);
     }
     private void openRadio(Player p){
@@ -112,7 +115,10 @@ public final class DeviceService implements Listener {
         switch(h.view()){
             case "phone" -> {if(slot==22){p.closeInventory();return;}switch(slot){
                 case 10->ask(p,Input.MESSAGE,"&bاكتب: اسم اللاعب: نص الرسالة");
-                case 11->identity(p);case 12->bank(p);case 13->photo(p);case 14->openGallery(p);case 15->openSocial(p);case 16->openSettings(p);default->{}}}
+                case 11->identity(p);case 12->bank(p);case 13->photo(p);case 14->openGallery(p);case 15->openSocial(p);case 16->openSettings(p);
+                case 18->{p.closeInventory();Bukkit.dispatchCommand(p,"inventory");}
+                case 19->{p.closeInventory();Bukkit.dispatchCommand(p,"mdt");}
+                case 20->openRadio(p);default->{}}}
             case "radio" -> {if(slot==22){p.closeInventory();return;}if(slot==13)ask(p,Input.SET_CHANNEL,"&9اكتب التردد من 1 إلى 100، ويمكن استخدام منزلتين عشريتين مثل 5.5 أو 10.25:");}
             case "gallery" -> {if(slot==49)openPhone(p);else if(isPhoto(e.getCurrentItem()))p.sendMessage(MetroViceRP.color("&eتفاصيل اللقطة ظاهرة في وصف العنصر."));}
             case "social" -> {if(slot==22)openPhone(p);else if(slot==13)ask(p,Input.POST,"&dاكتب منشورك على M (حتى 120 حرفًا):");}
