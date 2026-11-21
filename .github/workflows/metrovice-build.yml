@@ -21,7 +21,7 @@ jobs:
           java-version: '25'
           cache: maven
       - name: Build plugin
-        run: mvn --batch-mode --no-transfer-progress clean package
+        run: mvn --batch-mode --no-transfer-progress package
       - name: Assemble installable bundle
         shell: bash
         run: |
