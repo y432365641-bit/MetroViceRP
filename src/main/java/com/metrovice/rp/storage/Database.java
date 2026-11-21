@@ -66,6 +66,14 @@ public final class Database {
                   FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
                 )
                 """);
+            statement.executeUpdate("""
+                UPDATE department_memberships
+                SET total_duty_seconds = total_duty_seconds +
+                    CASE WHEN duty_started_at IS NULL THEN 0
+                         ELSE MAX(0, CAST(strftime('%s','now') AS INTEGER) - duty_started_at) END,
+                    on_duty = 0, duty_started_at = NULL
+                WHERE on_duty = 1
+                """);
         }
     }
 
