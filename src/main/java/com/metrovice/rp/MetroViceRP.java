@@ -18,7 +18,6 @@ import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
-import com.metrovice.rp.resourcepack.BedrockResourcePackManager;
 import com.metrovice.rp.device.DeviceService;
 import com.metrovice.rp.ems.EmergencyService;
 import org.bukkit.inventory.ItemStack;
@@ -49,28 +48,18 @@ public final class MetroViceRP extends JavaPlugin {
     private DeviceService deviceService;
     private EmergencyService emergencyService;
     private PoliceRankLaptopService policeRankLaptopService;
-    private Path bedrockPackPath;
 
     @Override
     public void onLoad() {
         super.onLoad();
-        // Geyser is a declared dependency, so its plugin is loaded first.
-        // Install custom item mappings before Geyser enables, but keep the pack
-        // under MetroViceRP's own data folder for API-based registration.
-        bedrockPackPath = com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
+        // Geyser is a declared dependency. Install the Bedrock pack into
+        // Geyser's native packs folder before its onEnable scans that folder.
+        com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
     }
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        try {
-            BedrockResourcePackManager bedrockPacks = new BedrockResourcePackManager(this, bedrockPackPath);
-            bedrockPacks.register();
-        } catch (Exception exception) {
-            getLogger().severe("Could not register MetroViceRP Bedrock pack with Geyser: " + exception.getMessage());
-            getLogger().severe("Bedrock pack delivery is unavailable until the Geyser API registration issue is fixed.");
-        }
-
         try {
             database = new Database(this);
             database.open();
