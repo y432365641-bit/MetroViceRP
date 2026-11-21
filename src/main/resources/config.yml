@@ -34,7 +34,12 @@ departments:
     - "جندي أول"
     - "جندي"
     - "متدرب"
-  ems-ranks: []
+  ems-ranks:
+    - "مدير الإسعاف"
+    - "نائب مدير الإسعاف"
+    - "مسعف أول"
+    - "مسعف"
+    - "متدرب"
 
 inventory:
   max-weight-kg: 30.0
@@ -54,3 +59,12 @@ resource-pack:
   required: false
   auto-send-on-join: true
   prompt: "Metro Vice RP - حزمة الموارد الرسمية"
+
+# EMS / downed-player system. Empty world uses the first loaded world's spawn.
+ems:
+  downed-seconds: 60
+  medic-nearby-radius: 48
+  revive-radius: 5
+  respawn:
+    world: ""
+    # x, y, z, yaw and pitch are optional; defaults to the selected world's spawn.
