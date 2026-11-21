@@ -1,3 +1,6 @@
 package com.metrovice.rp.character;
 
-public record CharacterProfile(int id, String ownerUuid, String name, int age, String createdAt) {}
+public record CharacterProfile(
+        int id, String ownerUuid, String name, int age,
+        String job, String rank, long cash, long bank, String createdAt
+) {}
