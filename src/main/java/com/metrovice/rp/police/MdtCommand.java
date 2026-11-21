@@ -16,9 +16,10 @@ public final class MdtCommand implements CommandExecutor {
     private final MetroViceRP plugin;
     private final CharacterService characters;
     private final DepartmentService departments;
+    private final MdtMenuService menus;
 
-    public MdtCommand(MetroViceRP plugin, CharacterService characters, DepartmentService departments) {
-        this.plugin = plugin; this.characters = characters; this.departments = departments;
+    public MdtCommand(MetroViceRP plugin, CharacterService characters, DepartmentService departments, MdtMenuService menus) {
+        this.plugin = plugin; this.characters = characters; this.departments = departments; this.menus = menus;
     }
 
     private void sendCitizenRecord(Player player, CharacterProfile profile) {
@@ -38,7 +39,11 @@ public final class MdtCommand implements CommandExecutor {
                 player.sendMessage(MetroViceRP.color("&cنظام MDT متاح لأفراد الشرطة أثناء المناوبة فقط."));
                 return true;
             }
-            if (args.length == 0 || args[0].equalsIgnoreCase("roster")) {
+            if (args.length == 0 || args[0].equalsIgnoreCase("menu")) {
+                menus.openMain(player);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("roster")) {
                 List<DepartmentService.DutyMember> roster = departments.onDuty("POLICE");
                 player.sendMessage(MetroViceRP.color("&8&m------ &bPolice MDT | المناوبون &8&m------"));
                 if (roster.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا يوجد أفراد مناوبون."));
