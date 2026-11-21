@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.metrovice</groupId><artifactId>MetroViceRP</artifactId><version>0.9.2-SNAPSHOT</version>
+  <groupId>com.metrovice</groupId><artifactId>MetroViceRP</artifactId><version>0.9.3</version>
   <name>MetroViceRP</name><description>Roleplay systems for Metro Vice RP</description>
   <properties><maven.compiler.release>25</maven.compiler.release><project.build.sourceEncoding>UTF-8</project.build.sourceEncoding></properties>
   <repositories>
@@ -15,13 +15,14 @@
   </dependencies>
   <build><finalName>MetroViceRP</finalName><plugins>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.1</version><configuration><release>25</release></configuration></plugin>
-    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration><createDependencyReducedPom>false</createDependencyReducedPom><transformers><transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/></transformers></configuration></execution></executions></plugin>
+    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version><executions><execution><phase>package</phase><goals><goal>shade</goal></executions><configuration><createDependencyReducedPom>false</createDependencyReducedPom><transformers><transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/></transformers></configuration></execution></executions></plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId><artifactId>maven-antrun-plugin</artifactId><version>3.1.0</version>
-      <executions><execution><id>embed-bedrock-pack</id><phase>generate-resources</phase><goals><goal>run</goal></goals>
+      <executions><execution><id>embed-resource-packs</id><phase>generate-resources</phase><goals><goal>run</goal></goals>
         <configuration><target>
           <mkdir dir="${project.build.outputDirectory}/embedded"/>
           <zip destfile="${project.build.outputDirectory}/embedded/MetroViceRP-Bedrock.mcpack" basedir="${project.basedir}/resourcepacks/bedrock"/>
+          <zip destfile="${project.build.outputDirectory}/embedded/MetroViceRP-Java.zip" basedir="${project.basedir}/resourcepacks/java"/>
           <copy file="${project.basedir}/resourcepacks/geyser/MetroViceRP.json" todir="${project.build.outputDirectory}/embedded"/>
         </target></configuration>
       </execution></executions>
