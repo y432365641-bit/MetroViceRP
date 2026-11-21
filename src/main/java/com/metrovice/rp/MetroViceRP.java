@@ -69,6 +69,7 @@ public final class MetroViceRP extends JavaPlugin {
         policeLaptop = new PoliceLaptopListener(this);
         getServer().getPluginManager().registerEvents(policeLaptop, this);
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates, departmentService), this);
+        getServer().getPluginManager().registerEvents(new PlayerNameVisibilityListener(this), this);
 
         // Periodic persistence protects character inventories if the server stops unexpectedly.
         getServer().getScheduler().runTaskTimer(this, this::saveOnlineCharacters, 1200L, 1200L);
