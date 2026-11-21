@@ -7,6 +7,7 @@ import com.metrovice.rp.character.CharacterStateService;
 import com.metrovice.rp.economy.BankCommand;
 import com.metrovice.rp.economy.BankService;
 import com.metrovice.rp.storage.Database;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -89,7 +90,41 @@ public final class MetroViceRP extends JavaPlugin {
             sender.sendMessage(color("&aتم تحديث إعدادات MetroViceRP."));
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload]"));
+        if (args[0].equalsIgnoreCase("setjob") || args[0].equalsIgnoreCase("setrank")) {
+            if (!sender.hasPermission("metrovice.admin")) {
+                sender.sendMessage(color("&cليس لديك صلاحية."));
+                return true;
+            }
+            if (args.length < 3) {
+                sender.sendMessage(color("&c/mvrp setjob <player> <job>"));
+                sender.sendMessage(color("&c/mvrp setrank <player> <rank>"));
+                return true;
+            }
+            Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا."));
+                return true;
+            }
+            try {
+                var profile = characterService.active(target.getUniqueId()).orElse(null);
+                if (profile == null) {
+                    sender.sendMessage(color("&cاللاعب لا يملك شخصية مفعلة."));
+                    return true;
+                }
+                String value = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                if (args[0].equalsIgnoreCase("setjob")) characterService.setJob(target.getUniqueId(), profile.id(), value);
+                else characterService.setRank(target.getUniqueId(), profile.id(), value);
+                sender.sendMessage(color("&aتم تحديث ملف شخصية " + target.getName() + "."));
+                target.sendMessage(color("&aتم تحديث بيانات وظيفتك/رتبتك من الإدارة."));
+            } catch (IllegalArgumentException ex) {
+                sender.sendMessage(color("&c" + ex.getMessage()));
+            } catch (SQLException ex) {
+                getLogger().severe("Could not update character profile: " + ex.getMessage());
+                sender.sendMessage(color("&cتعذر تحديث بيانات الشخصية."));
+            }
+            return true;
+        }
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank]"));
         return true;
     }
 
