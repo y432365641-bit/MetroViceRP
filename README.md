@@ -2,7 +2,7 @@
 
 The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 
-## Current milestone — Character Core 0.2.0
+## Current milestone — Character Core + Banking 0.3.0
 
 ### Character system
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
@@ -21,6 +21,8 @@ The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 ### Commands
 - `/mvrp` — plugin status.
 - `/mvrp reload` — reload configuration (operator permission).
+- `/mvrp setjob <player> <job>` — admin: change the online player's active character job.
+- `/mvrp setrank <player> <rank>` — admin: change the online player's active character rank.
 - `/character menu` — open the character selector.
 - `/character create <name> <age>` — create a character (names may contain spaces).
 - `/character list` — list owned characters.
