@@ -21,6 +21,9 @@ commands:
     aliases: [bag]
     description: Open the character custom bag
     usage: /inventory
+  outfit:
+    description: Save and equip character-specific clothing sets
+    usage: /outfit [list|save <name>|load <name>]
   character:
     aliases: [char]
     description: Create and manage isolated roleplay characters
