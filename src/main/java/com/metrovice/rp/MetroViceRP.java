@@ -136,7 +136,74 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank]"));
+        if (args[0].equalsIgnoreCase("hirepolice") || args[0].equalsIgnoreCase("hireems")
+                || args[0].equalsIgnoreCase("firepolice") || args[0].equalsIgnoreCase("fireems")) {
+            if (!sender.hasPermission("metrovice.admin")) {
+                sender.sendMessage(color("&cليس لديك صلاحية."));
+                return true;
+            }
+            boolean hiring = args[0].toLowerCase().startsWith("hire");
+            if (args.length < (hiring ? 3 : 2)) {
+                sender.sendMessage(color("&c/mvrp hirepolice <player> <rank>"));
+                sender.sendMessage(color("&c/mvrp hireems <player> <rank>"));
+                sender.sendMessage(color("&c/mvrp firepolice <player>"));
+                sender.sendMessage(color("&c/mvrp fireems <player>"));
+                return true;
+            }
+            Player targetPlayer = Bukkit.getPlayerExact(args[1]);
+            if (targetPlayer == null) {
+                sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا."));
+                return true;
+            }
+            String department = args[0].toLowerCase().contains("police") ? "POLICE" : "EMS";
+            try {
+                if (hiring) {
+                    String rank = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                    if (department.equals("POLICE") && !getConfig().getStringList("departments.police-ranks").contains(rank)) {
+                        sender.sendMessage(color("&cالرتبة غير موجودة في قائمة رتب الشرطة بالإعدادات."));
+                        return true;
+                    }
+                    departmentService.hire(targetPlayer.getUniqueId(), department, rank);
+                    sender.sendMessage(color("&aتم تسجيل " + targetPlayer.getName() + " في قسم " + department + " برتبة " + rank));
+                    targetPlayer.sendMessage(color("&aتم تعيين شخصيتك في قسم " + department + " برتبة " + rank));
+                } else {
+                    departmentService.fire(targetPlayer.getUniqueId(), department);
+                    sender.sendMessage(color("&eتم إنهاء خدمة شخصية " + targetPlayer.getName() + " من قسم " + department));
+                    targetPlayer.sendMessage(color("&eتم إنهاء خدمتك من قسم " + department));
+                }
+            } catch (IllegalArgumentException ex) {
+                sender.sendMessage(color("&c" + ex.getMessage()));
+            } catch (SQLException ex) {
+                getLogger().severe("Department administration error: " + ex.getMessage());
+                sender.sendMessage(color("&cتعذر تحديث القسم."));
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("dutylist")) {
+            if (args.length != 2) {
+                sender.sendMessage(color("&c/mvrp dutylist <police|ems>"));
+                return true;
+            }
+            try {
+                String department = departmentService.normalizeDepartment(args[1]);
+                var members = departmentService.onDuty(department);
+                sender.sendMessage(color("&8&m------ &b" + department + " - المناوبون &8&m------"));
+                if (members.isEmpty()) sender.sendMessage(color("&7لا يوجد أفراد على رأس عملهم حاليًا."));
+                for (var member : members) {
+                    long hours = member.dutySeconds() / 3600;
+                    long minutes = (member.dutySeconds() % 3600) / 60;
+                    sender.sendMessage(color("&f" + member.characterName() + " &7- " + member.rank()
+                            + " &8| &b" + hours + "h " + minutes + "m"));
+                }
+            } catch (IllegalArgumentException ex) {
+                sender.sendMessage(color("&c" + ex.getMessage()));
+            } catch (SQLException ex) {
+                getLogger().severe("Duty roster error: " + ex.getMessage());
+                sender.sendMessage(color("&cتعذر جلب قائمة المناوبين."));
+            }
+            return true;
+        }
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist]"));
         return true;
     }
 
