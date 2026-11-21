@@ -125,9 +125,12 @@ public final class InventoryService {
         if (cursor == null || cursor.getType().isAir()) return true;
         double weight = 0;
         for (int i = 0; i < STORAGE_SIZE; i++) {
-            if (i == slot) continue;
             ItemStack current = inventory.getItem(i);
             if (current != null && !current.getType().isAir()) weight += unitWeight(current) * current.getAmount();
+        }
+        ItemStack target = inventory.getItem(slot);
+        if (target != null && !target.getType().isAir() && !target.isSimilar(cursor)) {
+            weight -= unitWeight(target) * target.getAmount();
         }
         double projected = weight + unitWeight(cursor) * cursor.getAmount();
         double max = Math.max(1, plugin.getConfig().getDouble("inventory.max-weight-kg", 30.0));
