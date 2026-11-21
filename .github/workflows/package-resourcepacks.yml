@@ -1,7 +1,7 @@
 name: Package MetroViceRP Resource Packs
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/core-systems ]
     paths:
       - 'resourcepacks/**'
       - '.github/workflows/package-resourcepacks.yml'
@@ -19,7 +19,7 @@ jobs:
         run: sha1sum MetroViceRP-Java.zip MetroViceRP-Bedrock.mcpack | tee RESOURCEPACK-SHA1.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: MetroViceRP-ResourcePacks
+          name: MetroViceRP-ResourcePacks-Test
           path: |
             MetroViceRP-Java.zip
             MetroViceRP-Bedrock.mcpack
