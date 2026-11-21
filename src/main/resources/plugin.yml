@@ -8,6 +8,12 @@ commands:
   mvrp:
     description: MetroViceRP core status and administration
     usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|givephone|giveradio|banknpc]
+  emsbaggive:
+    description: Give an EMS medical bag to a player
+    usage: /emsbaggive <player>
+  ranklaptopgive:
+    description: Give a separate police rank management laptop
+    usage: /ranklaptopgive <player>
   mdt:
     description: Police mobile data terminal
     usage: /mdt [roster|search <name>]
