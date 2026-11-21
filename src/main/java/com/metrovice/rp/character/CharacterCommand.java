@@ -55,6 +55,7 @@ public final class CharacterCommand implements CommandExecutor {
         if (service.active(player.getUniqueId()).isEmpty()) {
             service.select(player.getUniqueId(), profile.id());
             states.load(player, profile.id());
+            player.closeInventory();
             player.sendMessage(MetroViceRP.color("&aتم تفعيل شخصيتك الأولى. أهلًا بك في المدينة!"));
         } else {
             player.sendMessage(MetroViceRP.color("&7لتفعيلها لاحقًا استخدم &b/character switch " + profile.id()));
@@ -78,7 +79,7 @@ public final class CharacterCommand implements CommandExecutor {
     }
 
     private void select(Player player, String[] args) throws SQLException {
-        if (args.length != 2) { player.sendMessage(MetroViceRP.color("&c/character select <id>")); return; }
+        if (args.length != 2) { player.sendMessage(MetroViceRP.color("&c/character switch <id>")); return; }
         int id = parseId(args[1]);
         CharacterProfile target = service.find(player.getUniqueId(), id)
                 .orElseThrow(() -> new IllegalArgumentException("هذه الشخصية غير موجودة في حسابك."));
@@ -138,7 +139,6 @@ public final class CharacterCommand implements CommandExecutor {
         player.sendMessage(MetroViceRP.color("&b/character list &7- عرض شخصياتك"));
         player.sendMessage(MetroViceRP.color("&b/character menu &7- فتح قائمة الشخصيات"));
         player.sendMessage(MetroViceRP.color("&b/character switch <id> &7- تبديل الشخصية"));
-        player.sendMessage(MetroViceRP.color("&b/character menu &7- فتح قائمة الشخصيات"));
         player.sendMessage(MetroViceRP.color("&b/character info &7- عرض ملف الشخصية"));
         player.sendMessage(MetroViceRP.color("&b/character rename <id> <name> &7- تغيير الاسم"));
         player.sendMessage(MetroViceRP.color("&b/character delete <id> CONFIRM &7- حذف الشخصية"));
