@@ -17,6 +17,8 @@ import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.device.DeviceService;
+import org.bukkit.inventory.ItemStack;
 import com.metrovice.rp.inventory.InventoryCommand;
 import com.metrovice.rp.inventory.InventoryListener;
 import com.metrovice.rp.inventory.InventoryService;
@@ -40,6 +42,7 @@ public final class MetroViceRP extends JavaPlugin {
     private PoliceLaptopListener policeLaptop;
     private ResourcePackService resourcePackService;
     private InventoryService inventoryService;
+    private DeviceService deviceService;
 
     @Override
     public void onEnable() {
@@ -72,6 +75,12 @@ public final class MetroViceRP extends JavaPlugin {
         MdtMenuService mdtMenus = new MdtMenuService(this, characterService, departmentService);
         Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService, mdtMenus));
         getServer().getPluginManager().registerEvents(new MdtMenuListener(this, mdtMenus, departmentService), this);
+        deviceService = new DeviceService(this, characterService);
+        getServer().getPluginManager().registerEvents(deviceService, this);
+        Objects.requireNonNull(getCommand("radio")).setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player player)) { sender.sendMessage("This command can only be used in-game."); return true; }
+            return deviceService.sendRadioMessage(player, String.join(" ", args));
+        });
         resourcePackService = new ResourcePackService(this);
         getServer().getPluginManager().registerEvents(resourcePackService, this);
         policeLaptop = new PoliceLaptopListener(this);
@@ -233,6 +242,18 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
+        if (args[0].equalsIgnoreCase("givephone") || args[0].equalsIgnoreCase("giveradio")) {
+            if (!sender.hasPermission("metrovice.admin")) { sender.sendMessage(color("&cليس لديك صلاحية.")); return true; }
+            if (args.length != 2) { sender.sendMessage(color("&c/mvrp givephone <player> أو /mvrp giveradio <player>")); return true; }
+            Player targetPlayer = Bukkit.getPlayerExact(args[1]);
+            if (targetPlayer == null) { sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا.")); return true; }
+            ItemStack device = args[0].equalsIgnoreCase("givephone") ? deviceService.createPhone() : deviceService.createRadio();
+            var leftovers = targetPlayer.getInventory().addItem(device);
+            if (!leftovers.isEmpty()) { sender.sendMessage(color("&cمخزون اللاعب ممتلئ.")); return true; }
+            sender.sendMessage(color("&aتم تسليم الجهاز إلى " + targetPlayer.getName()));
+            targetPlayer.sendMessage(color("&bاستلمت جهاز Metro Vice RP جديدًا."));
+            return true;
+        }
         if (args[0].equalsIgnoreCase("banknpc")) {
             if (!sender.hasPermission("metrovice.admin")) { sender.sendMessage(color("&cليس لديك صلاحية.")); return true; }
             if (!(sender instanceof Player player)) { sender.sendMessage("Only an in-game player can place the bank employee."); return true; }
@@ -294,7 +315,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|pack|pack send <player>|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc|mdt]"));
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|pack|pack send <player>|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|givephone|giveradio|banknpc|mdt|radio]"));
         return true;
     }
 
