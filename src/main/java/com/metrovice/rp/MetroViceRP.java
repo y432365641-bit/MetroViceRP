@@ -4,6 +4,8 @@ import com.metrovice.rp.character.CharacterCommand;
 import com.metrovice.rp.character.CharacterListener;
 import com.metrovice.rp.character.CharacterService;
 import com.metrovice.rp.character.CharacterStateService;
+import com.metrovice.rp.economy.BankCommand;
+import com.metrovice.rp.economy.BankService;
 import com.metrovice.rp.storage.Database;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -18,6 +20,7 @@ public final class MetroViceRP extends JavaPlugin {
     private Database database;
     private CharacterService characterService;
     private CharacterStateService characterStates;
+    private BankService bankService;
 
     @Override
     public void onEnable() {
@@ -27,6 +30,7 @@ public final class MetroViceRP extends JavaPlugin {
             database.open();
             characterService = new CharacterService(this, database);
             characterStates = new CharacterStateService(database);
+            bankService = new BankService(database, characterService);
         } catch (Exception exception) {
             getLogger().severe("Could not initialize MetroViceRP database: " + exception.getMessage());
             getServer().getPluginManager().disablePlugin(this);
@@ -35,6 +39,7 @@ public final class MetroViceRP extends JavaPlugin {
 
         Objects.requireNonNull(getCommand("character")).setExecutor(new CharacterCommand(this, characterService, characterStates));
         Objects.requireNonNull(getCommand("mvrp")).setExecutor(this);
+        Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates), this);
 
         // Periodic persistence protects character inventories if the server stops unexpectedly.
@@ -70,6 +75,7 @@ public final class MetroViceRP extends JavaPlugin {
             sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.2.0"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
+            sender.sendMessage(color("&7Banking: &aonline"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
             sender.sendMessage(color("&8&m--------------------------------"));
             return true;
