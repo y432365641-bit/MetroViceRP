@@ -5,6 +5,7 @@ import com.metrovice.rp.storage.Database;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -82,6 +83,17 @@ public final class InventoryService {
             inventory.setItem(slot, contents[slot] == null ? null : contents[slot].clone());
         }
         inventory.setItem(49, weightItem(contents));
+    }
+
+    public void dropAll(int characterId, Location location) throws SQLException {
+        ItemStack[] contents = load(characterId);
+        if (contents == null) return;
+        for (ItemStack item : contents) {
+            if (item != null && !item.getType().isAir()) {
+                location.getWorld().dropItemNaturally(location, item.clone());
+            }
+        }
+        save(characterId, new ItemStack[STORAGE_SIZE]);
     }
 
     private ItemStack[] load(int characterId) throws SQLException {
