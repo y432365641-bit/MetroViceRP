@@ -29,13 +29,19 @@ public final class CharacterListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (!player.isOnline()) return;
             try {
-                characters.active(player.getUniqueId()).ifPresent(profile -> {
-                    try { states.load(player, profile.id()); }
-                    catch (SQLException ex) { plugin.getLogger().severe("Could not load character state: " + ex.getMessage()); }
-                });
+                CharacterProfile active = characters.active(player.getUniqueId()).orElse(null);
+                if (active != null) {
+                    states.load(player, active.id());
+                    return;
+                }
+                player.sendMessage(MetroViceRP.color("&bأهلًا بك في Metro Vice RP!"));
+                player.sendMessage(MetroViceRP.color("&7اختر شخصيتك أو أنشئ شخصيتك الأولى للبدء."));
+                CharacterMenu.open(plugin, characters, player);
             } catch (SQLException ex) {
-                plugin.getLogger().severe("Could not find active character: " + ex.getMessage());
+                plugin.getLogger().severe("Could not initialize joining player's character: " + ex.getMessage());
+                player.sendMessage(MetroViceRP.color("&cتعذر فتح نظام الشخصيات. أبلغ الإدارة."));
             }
         });
     }
