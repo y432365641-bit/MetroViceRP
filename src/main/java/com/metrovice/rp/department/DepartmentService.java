@@ -96,6 +96,20 @@ public final class DepartmentService {
         return membership(characterId, dept).orElseThrow();
     }
 
+    public void endAllDuty(UUID owner) throws SQLException {
+        int characterId = activeCharacter(owner).id();
+        long now = System.currentTimeMillis() / 1000L;
+        try (PreparedStatement ps = database.connection().prepareStatement("""
+                UPDATE department_memberships
+                SET total_duty_seconds=total_duty_seconds+
+                    CASE WHEN duty_started_at IS NULL THEN 0 ELSE MAX(0, ? - duty_started_at) END,
+                    on_duty=0, duty_started_at=NULL
+                WHERE character_id=? AND on_duty=1
+                """)) {
+            ps.setLong(1, now); ps.setInt(2, characterId); ps.executeUpdate();
+        }
+    }
+
     public List<DutyMember> onDuty(String department) throws SQLException {
         String dept = normalizeDepartment(department);
         List<DutyMember> result = new ArrayList<>();
