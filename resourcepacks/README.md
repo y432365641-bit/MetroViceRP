@@ -18,3 +18,10 @@ The Java and Bedrock packs include dedicated MetroPhone and radio item artwork.
 
 ## Server delivery
 The plugin's resource-pack sender requires a direct HTTPS file URL and the matching SHA-1. Upload the generated Java ZIP or Bedrock MCpack to a direct HTTPS host, then set `resource-pack.enabled: true`, `resource-pack.url`, and `resource-pack.sha1` in `plugins/MetroViceRP/config.yml`. A GitHub Actions artifact download page is not itself a direct resource-pack URL.
+
+
+## تحديث 0.8.2
+- واجهة الراديو تسمح بإدخال تردد من 1 إلى 100 حتى منزلتين عشريتين.
+- الشرطة المسجلة بالقسم يمكنها استخدام الترددات كلها، والإسعاف المسجل بالقسم يمكنه استخدام التردد 5 فقط.
+- سجل الشرطة يعرض جميع الموظفين المسجلين في قاعدة البيانات، مع حالة المناوبة، ويعيد تحديث نفسه أثناء فتحه.
+- هذه النسخة لا تدّعي أن تسجيل البصمة الفعلي أو واجهة الراديو الصوتية قد اكتملت؛ حالة المناوبة الحالية مرتبطة بنظام المناوبة الموجود.
