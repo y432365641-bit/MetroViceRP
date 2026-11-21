@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -164,8 +165,23 @@ public final class EmergencyService implements Listener, CommandExecutor {
     }
 
     @EventHandler
+    public void onPhoneOpen(InventoryOpenEvent event) {
+        if (!(event.getPlayer() instanceof Player player)) return;
+        if (!(event.getInventory().getHolder() instanceof DeviceMenuHolder holder) || !holder.view().equals("phone")) return;
+        event.getInventory().setItem(17, button(Material.RED_CROSS, "&cالإسعاف والطوارئ", "&7طلب مسعف أو إدارة حالة الإسقاط"));
+    }
+
+    @EventHandler
     public void onMenuClick(org.bukkit.event.inventory.InventoryClickEvent event) {
         if (!(event.getView().getTopInventory().getHolder() instanceof DeviceMenuHolder holder)) return;
+        if (holder.view().equals("phone")) {
+            if (event.getClickedInventory() == event.getView().getTopInventory() && event.getRawSlot() == 17
+                    && event.getWhoClicked() instanceof Player player) {
+                event.setCancelled(true);
+                openEmergencyMenu(player);
+            }
+            return;
+        }
         if (!holder.view().equals("ems")) return;
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player player) || event.getClickedInventory() != event.getView().getTopInventory()) return;
