@@ -49,6 +49,12 @@ public final class MetroViceRP extends JavaPlugin {
     private PoliceRankLaptopService policeRankLaptopService;
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
+    }
+
+    @Override
     public void onEnable() {
         saveDefaultConfig();
         try {
