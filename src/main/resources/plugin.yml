@@ -1,5 +1,5 @@
 name: MetroViceRP
-version: 0.8.0
+version: 0.8.1
 main: com.metrovice.rp.MetroViceRP
 api-version: '1.21'
 authors: [Metro Vice RP]

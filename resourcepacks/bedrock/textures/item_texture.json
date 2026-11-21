@@ -4,6 +4,12 @@
   "texture_data": {
     "mvrp_panel": {
       "textures": "textures/ui/mvrp_panel"
+    },
+    "clock": {
+      "textures": "textures/items/clock_item"
+    },
+    "goat_horn": {
+      "textures": "textures/items/goat_horn"
     }
   }
 }

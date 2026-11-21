@@ -19,7 +19,7 @@ jobs:
         run: sha1sum MetroViceRP-Java.zip MetroViceRP-Bedrock.mcpack | tee RESOURCEPACK-SHA1.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: MetroViceRP-ResourcePacks-Test
+          name: MetroViceRP-ResourcePacks
           path: |
             MetroViceRP-Java.zip
             MetroViceRP-Bedrock.mcpack
