@@ -13,6 +13,7 @@ import com.metrovice.rp.department.DepartmentService;
 import com.metrovice.rp.department.DutyCommand;
 import com.metrovice.rp.police.MdtCommand;
 import com.metrovice.rp.police.PoliceLaptopListener;
+import com.metrovice.rp.police.PoliceRankLaptopService;
 import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
@@ -45,6 +46,7 @@ public final class MetroViceRP extends JavaPlugin {
     private InventoryService inventoryService;
     private DeviceService deviceService;
     private EmergencyService emergencyService;
+    private PoliceRankLaptopService policeRankLaptopService;
 
     @Override
     public void onEnable() {
