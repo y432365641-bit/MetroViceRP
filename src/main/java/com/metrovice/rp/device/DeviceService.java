@@ -3,6 +3,7 @@ package com.metrovice.rp.device;
 import com.metrovice.rp.MetroViceRP;
 import com.metrovice.rp.character.CharacterProfile;
 import com.metrovice.rp.character.CharacterService;
+import com.metrovice.rp.department.DepartmentService;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -28,18 +29,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class DeviceService implements Listener {
-    private enum Input { MESSAGE, POST, SET_PIN, UNLOCK }
+    private enum Input { MESSAGE, POST, SET_PIN, UNLOCK, SET_CHANNEL }
     private final JavaPlugin plugin;
     private final CharacterService characters;
+    private final DepartmentService departments;
     private final NamespacedKey phoneKey, radioKey, photoKey;
-    private final Map<UUID,Integer> channels = new ConcurrentHashMap<>();
+    private final Map<UUID,Double> channels = new ConcurrentHashMap<>();
     private final Map<UUID,Input> waiting = new ConcurrentHashMap<>();
     private final Map<UUID,Boolean> notifications = new ConcurrentHashMap<>();
     private final Map<UUID,String> pins = new ConcurrentHashMap<>();
     private final Deque<String> feed = new ArrayDeque<>();
 
-    public DeviceService(JavaPlugin plugin, CharacterService characters) {
-        this.plugin=plugin; this.characters=characters;
+    public DeviceService(JavaPlugin plugin, CharacterService characters, DepartmentService departments) {
+        this.plugin=plugin; this.characters=characters; this.departments=departments;
         phoneKey=new NamespacedKey(plugin,"mvrp_phone");
         radioKey=new NamespacedKey(plugin,"mvrp_radio");
         photoKey=new NamespacedKey(plugin,"mvrp_phone_photo");
@@ -73,9 +75,16 @@ public final class DeviceService implements Listener {
         inv.setItem(22,button(Material.BARRIER,"&cإغلاق"));p.openInventory(inv);
     }
     private void openRadio(Player p){
-        DeviceMenuHolder h=new DeviceMenuHolder("radio");Inventory inv=Bukkit.createInventory(h,27,"§1§lMETRO VICE §8| §9RADIO");h.inventory(inv);
-        for(int c=1;c<=5;c++)inv.setItem(9+c,button(Material.NOTE_BLOCK,"&bقناة "+c,"&7اضغط لاختيار القناة","&8"+(channels.getOrDefault(p.getUniqueId(),1)==c?"§aالقناة الحالية":"§7اختيار")));
-        inv.setItem(22,button(Material.BARRIER,"&cإغلاق"));p.openInventory(inv);
+        DeviceMenuHolder h=new DeviceMenuHolder("radio");
+        Inventory inv=Bukkit.createInventory(h,27,"§1§lMETRO VICE §8| §9الراديو");
+        h.inventory(inv);
+        double current=channels.getOrDefault(p.getUniqueId(),1.0);
+        inv.setItem(13,button(Material.NOTE_BLOCK,"&bتحديد التردد",
+                "&7التردد الحالي: &f"+formatFrequency(current),
+                "&7النطاق: 1.00 إلى 100.00",
+                "&eاضغط لإدخال تردد"));
+        inv.setItem(22,button(Material.BARRIER,"&cإغلاق"));
+        p.openInventory(inv);
     }
     private void openGallery(Player p){
         DeviceMenuHolder h=new DeviceMenuHolder("gallery");Inventory inv=Bukkit.createInventory(h,54,"§8§lMETRO VICE §8| §aGALLERY");h.inventory(inv);
@@ -104,7 +113,7 @@ public final class DeviceService implements Listener {
             case "phone" -> {if(slot==22){p.closeInventory();return;}switch(slot){
                 case 10->ask(p,Input.MESSAGE,"&bاكتب: اسم اللاعب: نص الرسالة");
                 case 11->identity(p);case 12->bank(p);case 13->photo(p);case 14->openGallery(p);case 15->openSocial(p);case 16->openSettings(p);default->{}}}
-            case "radio" -> {if(slot==22){p.closeInventory();return;}if(slot>=10&&slot<=14){int ch=slot-9;channels.put(p.getUniqueId(),ch);p.closeInventory();p.sendMessage(MetroViceRP.color("&9تم ضبط الراديو على القناة &b"+ch+"&9. للإرسال: &f/radio رسالتك"));}}
+            case "radio" -> {if(slot==22){p.closeInventory();return;}if(slot==13)ask(p,Input.SET_CHANNEL,"&9اكتب التردد من 1 إلى 100، ويمكن استخدام منزلتين عشريتين مثل 5.5 أو 10.25:");}
             case "gallery" -> {if(slot==49)openPhone(p);else if(isPhoto(e.getCurrentItem()))p.sendMessage(MetroViceRP.color("&eتفاصيل اللقطة ظاهرة في وصف العنصر."));}
             case "social" -> {if(slot==22)openPhone(p);else if(slot==13)ask(p,Input.POST,"&dاكتب منشورك على M (حتى 120 حرفًا):");}
             case "settings" -> {if(slot==11){notifications.put(p.getUniqueId(),!notifications.getOrDefault(p.getUniqueId(),true));openSettings(p);}else if(slot==13)ask(p,Input.SET_PIN,"&7اكتب رمزًا من 4 أرقام أو OFF لإلغاء الرمز:");else if(slot==22)openPhone(p);}
@@ -155,14 +164,52 @@ public final class DeviceService implements Listener {
                 else if(value.matches("\\d{4}")){pins.put(p.getUniqueId(),value);p.sendMessage(MetroViceRP.color("&aتم تعيين رمز الهاتف لهذه الجلسة."));}
                 else p.sendMessage(MetroViceRP.color("&cاكتب 4 أرقام أو OFF."));}
             case UNLOCK->{if(value.equals(pins.get(p.getUniqueId())))openPhone(p);else p.sendMessage(MetroViceRP.color("&cرمز القفل غير صحيح."));}
+            case SET_CHANNEL->{
+                try{
+                    double frequency=Double.parseDouble(value);
+                    if(!Double.isFinite(frequency)||frequency<1.0||frequency>100.0||Math.abs(frequency*100.0-Math.rint(frequency*100.0))>0.000001){
+                        p.sendMessage(MetroViceRP.color("&cالتردد يجب أن يكون بين 1 و100 وبحد أقصى منزلتين عشريتين."));
+                        openRadio(p);return;
+                    }
+                    if(!canUseFrequency(p,frequency)){
+                        p.sendMessage(MetroViceRP.color("&cلا تملك صلاحية دخول هذا التردد. الإسعاف مسموح له بالتردد 5 فقط."));
+                        openRadio(p);return;
+                    }
+                    channels.put(p.getUniqueId(),frequency);
+                    p.sendMessage(MetroViceRP.color("&aتم ضبط الراديو على التردد &b"+formatFrequency(frequency)));
+                    openRadio(p);
+                }catch(NumberFormatException ex){p.sendMessage(MetroViceRP.color("&cأدخل رقم تردد صحيح مثل 5.5 أو 10.25."));openRadio(p);}
+            }}
         }
     }
     private boolean hasPhone(Player p){for(ItemStack i:p.getInventory().getContents())if(i!=null&&i.hasItemMeta()&&i.getItemMeta().getPersistentDataContainer().has(phoneKey,PersistentDataType.BYTE))return true;return false;}
     public boolean sendRadioMessage(Player sender,String message){
         if(!hasRadio(sender)){sender.sendMessage(MetroViceRP.color("&cيجب أن تحمل الراديو لإرسال الرسائل."));return true;}
         if(message==null||message.isBlank()){sender.sendMessage(MetroViceRP.color("&eالاستخدام: /radio <رسالتك>"));return true;}
-        int ch=channels.getOrDefault(sender.getUniqueId(),1);String line=MetroViceRP.color("&9[لاسلكي "+ch+"] &b"+sender.getName()+"&f: "+message);
-        for(Player target:Bukkit.getOnlinePlayers())if(hasRadio(target)&&channels.getOrDefault(target.getUniqueId(),1)==ch)target.sendMessage(line);return true;
+        double frequency=channels.getOrDefault(sender.getUniqueId(),1.0);
+        if(!canUseFrequency(sender,frequency)){sender.sendMessage(MetroViceRP.color("&cلا تملك صلاحية استخدام هذا التردد."));return true;}
+        String shown=formatFrequency(frequency);
+        String line=MetroViceRP.color("&9[لاسلكي "+shown+"] &b"+sender.getName()+"&f: "+message);
+        for(Player target:Bukkit.getOnlinePlayers()){
+            double targetFrequency=channels.getOrDefault(target.getUniqueId(),1.0);
+            if(hasRadio(target)&&Double.compare(targetFrequency,frequency)==0&&canUseFrequency(target,frequency))target.sendMessage(line);
+        }
+        return true;
+    }
+    private boolean canUseFrequency(Player player,double frequency){
+        try{
+            var memberships=departments.memberships(player.getUniqueId());
+            boolean police=memberships.stream().anyMatch(m->m.department().equals("POLICE"));
+            boolean ems=memberships.stream().anyMatch(m->m.department().equals("EMS"));
+            if(police)return true;
+            return ems&&Math.abs(frequency-5.0)<0.000001;
+        }catch(SQLException ex){
+            plugin.getLogger().warning("Radio permission lookup failed: "+ex.getMessage());
+            return false;
+        }
+    }
+    private String formatFrequency(double frequency){
+        return java.math.BigDecimal.valueOf(frequency).stripTrailingZeros().toPlainString();
     }
     private boolean hasRadio(Player p){if(isRadio(p.getInventory().getItemInMainHand())||isRadio(p.getInventory().getItemInOffHand()))return true;for(ItemStack i:p.getInventory().getContents())if(isRadio(i))return true;return false;}
     private boolean isRadio(ItemStack i){return i!=null&&i.hasItemMeta()&&i.getItemMeta().getPersistentDataContainer().has(radioKey,PersistentDataType.BYTE);}

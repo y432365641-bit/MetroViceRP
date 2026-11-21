@@ -14,6 +14,7 @@ import java.util.UUID;
 public final class DepartmentService {
     public record Membership(String department, String rank, boolean onDuty, long totalDutySeconds, Long dutyStartedAt) {}
     public record DutyMember(String characterName, String rank, String department, long dutySeconds) {}
+    public record RosterMember(int characterId, String characterName, String rank, String department, boolean onDuty, long dutySeconds) {}
 
     private final Database database;
     private final CharacterService characters;
@@ -163,6 +164,33 @@ public final class DepartmentService {
             ps.setInt(1, characterId); ps.setString(2, dept);
             try (ResultSet rs = ps.executeQuery()) { return rs.next() && rs.getInt(1) == 1; }
         }
+    }
+
+    public List<RosterMember> roster(String department) throws SQLException {
+        String dept = normalizeDepartment(department);
+        List<RosterMember> result = new ArrayList<>();
+        long now = System.currentTimeMillis() / 1000L;
+        try (PreparedStatement ps = database.connection().prepareStatement("""
+                SELECT c.character_id, c.character_name, d.rank_name, d.department,
+                       d.on_duty, d.total_duty_seconds, d.duty_started_at
+                FROM department_memberships d
+                JOIN characters c ON c.character_id=d.character_id
+                WHERE d.department=?
+                ORDER BY c.character_name COLLATE NOCASE
+                """)) {
+            ps.setString(1, dept);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    long started = rs.getLong("duty_started_at");
+                    long total = rs.getLong("total_duty_seconds");
+                    boolean onDuty = rs.getInt("on_duty") == 1;
+                    if (onDuty && !rs.wasNull()) total += Math.max(0, now - started);
+                    result.add(new RosterMember(rs.getInt("character_id"), rs.getString("character_name"),
+                            rs.getString("rank_name"), dept, onDuty, total));
+                }
+            }
+        }
+        return result;
     }
 
     public List<DutyMember> onDuty(String department) throws SQLException {

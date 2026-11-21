@@ -75,7 +75,7 @@ public final class MetroViceRP extends JavaPlugin {
         MdtMenuService mdtMenus = new MdtMenuService(this, characterService, departmentService);
         Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService, mdtMenus));
         getServer().getPluginManager().registerEvents(new MdtMenuListener(this, mdtMenus, departmentService), this);
-        deviceService = new DeviceService(this, characterService);
+        deviceService = new DeviceService(this, characterService, departmentService);
         getServer().getPluginManager().registerEvents(deviceService, this);
         Objects.requireNonNull(getCommand("radio")).setExecutor((sender, command, label, args) -> {
             if (!(sender instanceof Player player)) { sender.sendMessage("This command can only be used in-game."); return true; }
@@ -124,7 +124,7 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.8.1"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.8.2"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
             sender.sendMessage(color("&7Custom bag: &ephase 1"));

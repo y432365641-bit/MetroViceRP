@@ -39,16 +39,35 @@ public final class MdtMenuService {
     }
 
     public void openRoster(Player player) throws SQLException {
-        Inventory inv = Bukkit.createInventory(new MdtMenuHolder("roster"), 54, "§1POLICE MDT §8| §bالمناوبون");
-        List<DepartmentService.DutyMember> roster = departments.onDuty("POLICE");
-        int slot = 0;
-        for (DepartmentService.DutyMember member : roster) {
-            if (slot >= 45) break;
-            inv.setItem(slot++, item(Material.PLAYER_HEAD, "§f" + member.characterName(),
-                    "§7الرتبة: §b" + member.rank(), "§8المدة: " + duration(member.dutySeconds())));
-        }
-        inv.setItem(49, item(Material.ARROW, "§eالعودة", "§7القائمة الرئيسية"));
+        Inventory inv = Bukkit.createInventory(new MdtMenuHolder("roster"), 54, "§1POLICE MDT §8| §bسجل الشرطة");
+        renderRoster(inv);
         player.openInventory(inv);
+        Bukkit.getScheduler().runTaskTimer(plugin, task -> {
+            if (!player.isOnline() || !(player.getOpenInventory().getTopInventory().getHolder() instanceof MdtMenuHolder holder)
+                    || !holder.view().equals("roster")) {
+                task.cancel();
+                return;
+            }
+            try { renderRoster(player.getOpenInventory().getTopInventory()); }
+            catch (SQLException ex) {
+                plugin.getLogger().warning("Could not refresh police roster: " + ex.getMessage());
+            }
+        }, 40L, 40L);
+    }
+
+    private void renderRoster(Inventory inv) throws SQLException {
+        inv.clear();
+        List<DepartmentService.RosterMember> roster = departments.roster("POLICE");
+        int slot = 0;
+        for (DepartmentService.RosterMember member : roster) {
+            if (slot >= 45) break;
+            String status = member.onDuty() ? "§aمسجل دخول بالبصمة" : "§7خارج الخدمة";
+            inv.setItem(slot++, item(Material.PLAYER_HEAD, "§f" + member.characterName(),
+                    "§7الرتبة: §b" + member.rank(), status,
+                    "§7رقم الشخصية: §f" + member.characterId()));
+        }
+        if (roster.isEmpty()) inv.setItem(22, item(Material.BARRIER, "§7لا يوجد أفراد مسجلون في الشرطة"));
+        inv.setItem(49, item(Material.ARROW, "§eالعودة", "§7القائمة الرئيسية"));
     }
 
     public void openRanks(Player player) throws SQLException {
