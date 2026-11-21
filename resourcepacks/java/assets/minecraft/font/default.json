@@ -1,0 +1,13 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "metrovice:gui/mvrp_panel.png",
+      "ascent": 8,
+      "height": 16,
+      "chars": [
+        ""
+      ]
+    }
+  ]
+}
