@@ -8,6 +8,8 @@ The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
 - Arabic and international character names, including spaces.
 - Per-character profile fields: age, job, rank, cash, and bank balance.
+- Configurable starting cash and bank balance.
+- Character-linked bank with balance, deposit, withdrawal, and player-to-player bank transfer.
 - Persistent active-character selection.
 - Ownership validation on every character lookup and selection.
 - In-game character selection inventory: `/character menu`.
@@ -33,6 +35,12 @@ Example:
 /character menu
 /character info
 ```
+
+### Bank commands
+- `/bank balance`
+- `/bank deposit <amount>`
+- `/bank withdraw <amount>`
+- `/bank send <player> <amount>` (both players must be online and have an active character)
 
 ## Build
 
