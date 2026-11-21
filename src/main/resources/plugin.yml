@@ -17,6 +17,10 @@ commands:
   bank:
     description: Character-linked banking
     usage: /bank <balance|deposit|withdraw|send>
+  inventory:
+    aliases: [bag]
+    description: Open the character custom bag
+    usage: /inventory
   character:
     aliases: [char]
     description: Create and manage isolated roleplay characters
