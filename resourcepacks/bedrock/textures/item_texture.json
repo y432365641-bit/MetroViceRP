@@ -10,6 +10,9 @@
     },
     "goat_horn": {
       "textures": "textures/items/goat_horn"
+    },
+    "medical_bag": {
+      "textures": "textures/items/medical_bag"
     }
   }
 }
