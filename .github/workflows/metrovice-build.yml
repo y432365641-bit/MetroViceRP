@@ -27,20 +27,20 @@ jobs:
         run: |
           set -euo pipefail
           test -s target/MetroViceRP.jar
-          mkdir -p bundle/plugins/Geyser-Spigot/packs bundle/resourcepacks
+          mkdir -p bundle/plugins/Geyser-Spigot/packs bundle/plugins/Geyser-Spigot/custom_mappings bundle/resourcepacks
           cp target/MetroViceRP.jar bundle/plugins/MetroViceRP.jar
           (cd resourcepacks/java && zip -qr ../../bundle/resourcepacks/MetroViceRP-Java.zip .)
           (cd resourcepacks/bedrock && zip -qr ../../bundle/resourcepacks/MetroViceRP-Bedrock.mcpack .)
-          cp bundle/resourcepacks/MetroViceRP-Bedrock.mcpack bundle/plugins/Geyser-Spigot/packs/
+          cp bundle/resourcepacks/MetroViceRP-Bedrock.mcpack bundle/plugins/Geyser-Spigot/packs/\n          cp resourcepacks/geyser/MetroViceRP.json bundle/plugins/Geyser-Spigot/custom_mappings/
           sha1sum bundle/resourcepacks/MetroViceRP-Java.zip bundle/resourcepacks/MetroViceRP-Bedrock.mcpack > bundle/resourcepacks/RESOURCEPACK-SHA1.txt
           cat > bundle/INSTALL-AR.txt <<'EOF'
           Metro Vice RP - حزمة التثبيت
           
           1) ارفع plugins/MetroViceRP.jar إلى مجلد plugins في السيرفر.
-          2) ارفع plugins/Geyser-Spigot/packs/MetroViceRP-Bedrock.mcpack إلى المسار نفسه داخل مجلد Geyser-Spigot في السيرفر. أعد التشغيل حتى يرسل Geyser الحزمة لعملاء Bedrock.
-          3) حزمة Java منفصلة داخل resourcepacks/MetroViceRP-Java.zip. استضفها على رابط HTTPS مباشر واضبط resource-pack.enabled/url/sha1 في config.yml باستخدام قيمة SHA-1 المطابقة في RESOURCEPACK-SHA1.txt.
-          4) لا ترفع ملف ZIP الكامل كأنه بلجن. استخرج الحزمة أولًا.
-          5) لا تحذف plugins/MetroViceRP/metrovice.db عند التحديث؛ هذا ملف بيانات الشخصيات والأقسام.
+          2) ارفع plugins/Geyser-Spigot/packs/MetroViceRP-Bedrock.mcpack إلى المسار نفسه داخل مجلد Geyser-Spigot في السيرفر.\n          3) ارفع plugins/Geyser-Spigot/custom_mappings/MetroViceRP.json إلى مجلد custom_mappings في Geyser. فعّل gameplay.enable-custom-content: true في config.yml الخاص بـ Geyser ثم أعد تشغيل السيرفر.
+          4) حزمة Java منفصلة داخل resourcepacks/MetroViceRP-Java.zip. استضفها على رابط HTTPS مباشر واضبط resource-pack.enabled/url/sha1 في config.yml باستخدام قيمة SHA-1 المطابقة في RESOURCEPACK-SHA1.txt.
+          5) لا ترفع ملف ZIP الكامل كأنه بلجن. استخرج الحزمة أولًا.
+          6) لا تحذف plugins/MetroViceRP/metrovice.db عند التحديث؛ هذا ملف بيانات الشخصيات والأقسام.
           
           ملاحظة: الحزمة تجمع ملفات التوزيع فقط. يجب اختبار عرض الموارد والواجهات داخل عميل Java وBedrock بعد التثبيت.
           EOF
