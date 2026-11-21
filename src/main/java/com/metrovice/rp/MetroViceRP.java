@@ -8,6 +8,8 @@ import com.metrovice.rp.economy.BankCommand;
 import com.metrovice.rp.economy.BankService;
 import com.metrovice.rp.department.DepartmentService;
 import com.metrovice.rp.department.DutyCommand;
+import com.metrovice.rp.police.MdtCommand;
+import com.metrovice.rp.police.PoliceLaptopListener;
 import com.metrovice.rp.storage.Database;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -25,6 +27,7 @@ public final class MetroViceRP extends JavaPlugin {
     private CharacterStateService characterStates;
     private BankService bankService;
     private DepartmentService departmentService;
+    private PoliceLaptopListener policeLaptop;
 
     @Override
     public void onEnable() {
@@ -46,6 +49,9 @@ public final class MetroViceRP extends JavaPlugin {
         Objects.requireNonNull(getCommand("mvrp")).setExecutor(this);
         Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
         Objects.requireNonNull(getCommand("duty")).setExecutor(new DutyCommand(this, departmentService));
+        Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService));
+        policeLaptop = new PoliceLaptopListener(this);
+        getServer().getPluginManager().registerEvents(policeLaptop, this);
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates, departmentService), this);
 
         // Periodic persistence protects character inventories if the server stops unexpectedly.
@@ -179,6 +185,29 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
+        if (args[0].equalsIgnoreCase("givelaptop")) {
+            if (!sender.hasPermission("metrovice.admin")) {
+                sender.sendMessage(color("&cليس لديك صلاحية."));
+                return true;
+            }
+            if (args.length != 2) {
+                sender.sendMessage(color("&c/mvrp givelaptop <player>"));
+                return true;
+            }
+            Player targetPlayer = Bukkit.getPlayerExact(args[1]);
+            if (targetPlayer == null) {
+                sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا."));
+                return true;
+            }
+            var leftovers = targetPlayer.getInventory().addItem(policeLaptop.createLaptop());
+            if (!leftovers.isEmpty()) {
+                sender.sendMessage(color("&cمخزون اللاعب ممتلئ."));
+                return true;
+            }
+            sender.sendMessage(color("&aتم تسليم جهاز MDT إلى " + targetPlayer.getName()));
+            targetPlayer.sendMessage(color("&9استلمت جهاز MDT الخاص بالشرطة."));
+            return true;
+        }
         if (args[0].equalsIgnoreCase("dutylist")) {
             if (args.length != 2) {
                 sender.sendMessage(color("&c/mvrp dutylist <police|ems>"));
@@ -210,7 +239,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist]"));
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|mdt]"));
         return true;
     }
 
