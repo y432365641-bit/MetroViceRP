@@ -134,12 +134,14 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.8.2"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.0 RC"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
             sender.sendMessage(color("&7Custom bag: &ephase 1"));
             sender.sendMessage(color("&7Banking: &aonline"));
             sender.sendMessage(color("&7Police / EMS duty: &aonline"));
+            sender.sendMessage(color("&7Phone / Emergency system: &aonline"));
+            sender.sendMessage(color("&7Police rank laptop: &aLieutenant+"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
             sender.sendMessage(color("&8&m--------------------------------"));
             return true;
