@@ -54,6 +54,7 @@ public final class MetroViceRP extends JavaPlugin {
         Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
         bankNpcListener = new BankNpcListener(this, bankService);
         getServer().getPluginManager().registerEvents(bankNpcListener, this);
+        bankNpcListener.restoreEmployee();
         Objects.requireNonNull(getCommand("duty")).setExecutor(new DutyCommand(this, departmentService));
         Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService));
         resourcePackService = new ResourcePackService(this);
