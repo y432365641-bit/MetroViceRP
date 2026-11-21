@@ -36,8 +36,12 @@ public final class InventoryService {
         if (contents == null) {
             // One-time migration: preserve the character's existing vanilla items.
             contents = Arrays.copyOf(player.getInventory().getStorageContents(), STORAGE_SIZE);
+            ItemStack[] armor = player.getInventory().getArmorContents();
+            ItemStack[] extra = player.getInventory().getExtraContents();
             save(character.id(), contents);
             player.getInventory().clear();
+            player.getInventory().setArmorContents(armor);
+            player.getInventory().setExtraContents(extra);
             player.updateInventory();
         }
         Inventory gui = Bukkit.createInventory(new InventoryHolderImpl(character.id()), 54,
@@ -117,13 +121,29 @@ public final class InventoryService {
         }
     }
 
+    public boolean canPlace(Inventory inventory, int slot, ItemStack cursor) {
+        if (cursor == null || cursor.getType().isAir()) return true;
+        double weight = 0;
+        for (int i = 0; i < STORAGE_SIZE; i++) {
+            if (i == slot) continue;
+            ItemStack current = inventory.getItem(i);
+            if (current != null && !current.getType().isAir()) weight += unitWeight(current) * current.getAmount();
+        }
+        double projected = weight + unitWeight(cursor) * cursor.getAmount();
+        double max = Math.max(1, plugin.getConfig().getDouble("inventory.max-weight-kg", 30.0));
+        return projected <= max + 0.0001;
+    }
+
+    private double unitWeight(ItemStack item) {
+        return Math.max(0, plugin.getConfig().getDouble(
+                "inventory.item-weights." + item.getType().name(), 0.1));
+    }
+
     private ItemStack weightItem(ItemStack[] contents) {
         double weight = 0;
         for (ItemStack item : contents) {
             if (item != null && !item.getType().isAir()) {
-                double unit = plugin.getConfig().getDouble(
-                        "inventory.item-weights." + item.getType().name(), 0.1);
-                weight += Math.max(0, unit) * item.getAmount();
+                weight += unitWeight(item) * item.getAmount();
             }
         }
         double max = Math.max(1, plugin.getConfig().getDouble("inventory.max-weight-kg", 30.0));
