@@ -2,7 +2,7 @@
 
 The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 
-## Current milestone — Character, Banking, Departments & Police MDT 0.5.0
+## Current milestone — Character, Bank Employee NPC, Departments & Police MDT 0.6.0
 
 ### Character system
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
@@ -53,6 +53,18 @@ Example:
 - `/mvrp dutylist <police|ems>` — show current on-duty roster and session duration.
 
 Police ranks are configured in the exact hierarchy supplied for Metro Vice RP. EMS ranks remain configurable.
+
+### Bank employee NPC
+- Admin creates the in-world bank employee at their current location with `/mvrp banknpc`.
+- Right-click the employee to open the bank account menu and see the active character's cash and bank balance.
+- Deposit and withdrawal are performed through the employee GUI using the available amount buttons.
+- `/bank send <player> <amount>` remains available for player-to-player transfers.
+
+### Character entry and switching
+- On first join, the character menu opens automatically.
+- Create the first character with `/character create <name> <age>`; it is activated automatically.
+- `/character` or `/character menu` opens the character selector.
+- `/character switch <id>` switches to another saved character and loads its isolated state.
 
 ### Bank commands
 - `/bank balance`
