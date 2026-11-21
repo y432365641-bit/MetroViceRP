@@ -2,7 +2,17 @@
 
 The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 
-## Current milestone — Character, Bank Employee NPC, Departments & Police MDT 0.6.0
+## Current milestone — Resource Pack Delivery Integration 0.7.0
+
+### Resource pack delivery (integration wired; pack assets still being built)
+- Configurable HTTPS direct ZIP URL and SHA-1 validation.
+- Optional automatic delivery when a player joins.
+- `/mvrp pack` sends the configured pack to yourself.
+- `/mvrp pack send <player>` sends it to an online player (admin permission).
+- Configure `resource-pack.enabled`, `url`, `sha1`, `required`, `auto-send-on-join`, and `prompt` in `config.yml`.
+- Java and Bedrock pack assets are separate deliverables; this integration alone does not mean the final packs or their phone/radio/bank interfaces are finished.
+
+## Existing core milestone — Character, Bank Employee NPC, Departments & Police MDT 0.6.0
 
 ### Character system
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
