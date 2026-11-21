@@ -12,7 +12,19 @@
       "textures": "textures/items/goat_horn"
     },
     "medical_bag": {
-      "textures": ["textures/items/medical_bag"]
+      "textures": [
+        "textures/items/medical_bag"
+      ]
+    },
+    "mdt_laptop": {
+      "textures": [
+        "textures/items/mdt_laptop"
+      ]
+    },
+    "rank_laptop": {
+      "textures": [
+        "textures/items/rank_laptop"
+      ]
     }
   }
 }
