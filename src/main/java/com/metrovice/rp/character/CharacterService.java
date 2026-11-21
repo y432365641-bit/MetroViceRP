@@ -89,6 +89,31 @@ public final class CharacterService {
         }
     }
 
+    public void setJob(UUID owner, int id, String job) throws SQLException {
+        String value = cleanProfileValue(job, "الوظيفة");
+        try (PreparedStatement ps = database.connection().prepareStatement(
+                "UPDATE characters SET job=? WHERE owner_uuid=? AND character_id=?")) {
+            ps.setString(1, value); ps.setString(2, owner.toString()); ps.setInt(3, id);
+            if (ps.executeUpdate() == 0) throw new IllegalArgumentException("الشخصية غير موجودة بحسابك.");
+        }
+    }
+
+    public void setRank(UUID owner, int id, String rank) throws SQLException {
+        String value = cleanProfileValue(rank, "الرتبة");
+        try (PreparedStatement ps = database.connection().prepareStatement(
+                "UPDATE characters SET rank_name=? WHERE owner_uuid=? AND character_id=?")) {
+            ps.setString(1, value); ps.setString(2, owner.toString()); ps.setInt(3, id);
+            if (ps.executeUpdate() == 0) throw new IllegalArgumentException("الشخصية غير موجودة بحسابك.");
+        }
+    }
+
+    private String cleanProfileValue(String raw, String field) {
+        String value = raw == null ? "" : raw.strip().replaceAll("\\s+", " ");
+        if (value.isEmpty() || value.length() > 32 || value.codePoints().anyMatch(Character::isISOControl))
+            throw new IllegalArgumentException(field + " غير صالحة (1 إلى 32 حرفًا).");
+        return value;
+    }
+
     public void rename(UUID owner, int id, String newName) throws SQLException {
         String name = newName == null ? "" : newName.strip().replaceAll("\\s+", " ");
         if (name.length() < 3 || name.length() > 32 || !validName(name))
