@@ -65,10 +65,10 @@ public final class CharacterService {
         String value = query == null ? "" : query.strip();
         if (value.length() < 2 || value.length() > 32)
             throw new IllegalArgumentException("اكتب حرفين على الأقل للبحث.");
-        String pattern = "%" + value.replace("\\\\", "\\\\\\\\").replace("%", "\\\\%").replace("_", "\\\\_") + "%";
+        String pattern = "%" + value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%";
         List<CharacterProfile> result = new ArrayList<>();
         try (PreparedStatement ps = database.connection().prepareStatement(
-                "SELECT * FROM characters WHERE character_name LIKE ? ESCAPE '\\\\' COLLATE NOCASE ORDER BY character_name LIMIT 10")) {
+                "SELECT * FROM characters WHERE character_name LIKE ? ESCAPE '\\' COLLATE NOCASE ORDER BY character_name LIMIT 10")) {
             ps.setString(1, pattern);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) result.add(map(rs));
