@@ -14,6 +14,7 @@ import java.util.UUID;
 public final class DepartmentService {
     public record Membership(String department, String rank, boolean onDuty, long totalDutySeconds, Long dutyStartedAt) {}
     public record DutyMember(String characterName, String rank, String department, long dutySeconds) {}
+    public record RosterMember(int characterId, String characterName, String rank, String department, boolean onDuty, long dutySeconds) {}
 
     private final Database database;
     private final CharacterService characters;
@@ -143,6 +144,18 @@ public final class DepartmentService {
         }
     }
 
+    public void changeRankByCharacterId(int characterId, String department, String rank) throws SQLException {
+        String dept = normalizeDepartment(department);
+        String cleanRank = cleanRank(rank);
+        try (PreparedStatement ps = database.connection().prepareStatement("UPDATE department_memberships SET rank_name=? WHERE character_id=? AND department=?")) {
+            ps.setString(1, cleanRank); ps.setInt(2, characterId); ps.setString(3, dept);
+            if (ps.executeUpdate() == 0) throw new IllegalArgumentException("لا توجد عضوية بهذا الرقم في القسم.");
+        }
+        try (PreparedStatement ps = database.connection().prepareStatement("UPDATE characters SET rank_name=? WHERE character_id=?")) {
+            ps.setString(1, cleanRank); ps.setInt(2, characterId); ps.executeUpdate();
+        }
+    }
+
     public boolean isOnDuty(UUID owner, String department) throws SQLException {
         String dept = normalizeDepartment(department);
         int characterId = activeCharacter(owner).id();
@@ -151,6 +164,34 @@ public final class DepartmentService {
             ps.setInt(1, characterId); ps.setString(2, dept);
             try (ResultSet rs = ps.executeQuery()) { return rs.next() && rs.getInt(1) == 1; }
         }
+    }
+
+    public List<RosterMember> roster(String department) throws SQLException {
+        String dept = normalizeDepartment(department);
+        List<RosterMember> result = new ArrayList<>();
+        long now = System.currentTimeMillis() / 1000L;
+        try (PreparedStatement ps = database.connection().prepareStatement("""
+                SELECT c.character_id, c.character_name, d.rank_name, d.department,
+                       d.on_duty, d.total_duty_seconds, d.duty_started_at
+                FROM department_memberships d
+                JOIN characters c ON c.character_id=d.character_id
+                WHERE d.department=?
+                ORDER BY c.character_name COLLATE NOCASE
+                """)) {
+            ps.setString(1, dept);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    long started = rs.getLong("duty_started_at");
+                    boolean startedIsNull = rs.wasNull();
+                    long total = rs.getLong("total_duty_seconds");
+                    boolean onDuty = rs.getInt("on_duty") == 1;
+                    if (onDuty && !startedIsNull) total += Math.max(0, now - started);
+                    result.add(new RosterMember(rs.getInt("character_id"), rs.getString("character_name"),
+                            rs.getString("rank_name"), dept, onDuty, total));
+                }
+            }
+        }
+        return result;
     }
 
     public List<DutyMember> onDuty(String department) throws SQLException {

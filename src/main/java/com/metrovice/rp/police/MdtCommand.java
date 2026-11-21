@@ -16,9 +16,16 @@ public final class MdtCommand implements CommandExecutor {
     private final MetroViceRP plugin;
     private final CharacterService characters;
     private final DepartmentService departments;
+    private final MdtMenuService menus;
 
-    public MdtCommand(MetroViceRP plugin, CharacterService characters, DepartmentService departments) {
-        this.plugin = plugin; this.characters = characters; this.departments = departments;
+    public MdtCommand(MetroViceRP plugin, CharacterService characters, DepartmentService departments, MdtMenuService menus) {
+        this.plugin = plugin; this.characters = characters; this.departments = departments; this.menus = menus;
+    }
+
+    private void sendCitizenRecord(Player player, CharacterProfile profile) {
+        player.sendMessage(MetroViceRP.color("&b" + profile.name() + " &7| رقم الهوية: &f" + profile.id()
+                + " &7| العمر: &f" + profile.age() + " &7| الوظيفة: &f" + profile.job()
+                + " &7| الرتبة: &f" + profile.rank()));
     }
 
     @Override
@@ -32,14 +39,18 @@ public final class MdtCommand implements CommandExecutor {
                 player.sendMessage(MetroViceRP.color("&cنظام MDT متاح لأفراد الشرطة أثناء المناوبة فقط."));
                 return true;
             }
-            if (args.length == 0 || args[0].equalsIgnoreCase("roster")) {
+            if (args.length == 0 || args[0].equalsIgnoreCase("menu")) {
+                menus.openMain(player);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("roster")) {
                 List<DepartmentService.DutyMember> roster = departments.onDuty("POLICE");
                 player.sendMessage(MetroViceRP.color("&8&m------ &bPolice MDT | المناوبون &8&m------"));
                 if (roster.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا يوجد أفراد مناوبون."));
                 for (DepartmentService.DutyMember member : roster) {
                     player.sendMessage(MetroViceRP.color("&f" + member.characterName() + " &7- " + member.rank()));
                 }
-                player.sendMessage(MetroViceRP.color("&7للبحث عن هوية: &b/mdt search <name>"));
+                player.sendMessage(MetroViceRP.color("&7للبحث عن هوية: &b/mdt search <name|number>"));
                 return true;
             }
             if (args[0].equalsIgnoreCase("search")) {
@@ -48,17 +59,19 @@ public final class MdtCommand implements CommandExecutor {
                     return true;
                 }
                 String query = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
-                List<CharacterProfile> matches = characters.searchByName(query);
                 player.sendMessage(MetroViceRP.color("&8&m------ &bنتائج البحث &8&m------"));
-                if (matches.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا توجد نتائج."));
-                for (CharacterProfile profile : matches) {
-                    player.sendMessage(MetroViceRP.color("&b" + profile.name() + " &7| العمر: &f" + profile.age()
-                            + " &7| الوظيفة: &f" + profile.job() + " &7| الرتبة: &f" + profile.rank()
-                            + " &8| ID: " + profile.id()));
+                if (query.matches("\\d+")) {
+                    CharacterProfile profile = characters.findByIdentityNumber(Integer.parseInt(query)).orElse(null);
+                    if (profile == null) player.sendMessage(MetroViceRP.color("&7لا توجد هوية بهذا الرقم."));
+                    else sendCitizenRecord(player, profile);
+                } else {
+                    List<CharacterProfile> matches = characters.searchByName(query);
+                    if (matches.isEmpty()) player.sendMessage(MetroViceRP.color("&7لا توجد نتائج."));
+                    for (CharacterProfile profile : matches) sendCitizenRecord(player, profile);
                 }
                 return true;
             }
-            player.sendMessage(MetroViceRP.color("&c/mdt [roster|search <name>]"));
+            player.sendMessage(MetroViceRP.color("&c/mdt [roster|search <name|number>]"));
         } catch (IllegalArgumentException ex) {
             player.sendMessage(MetroViceRP.color("&c" + ex.getMessage()));
         } catch (SQLException ex) {

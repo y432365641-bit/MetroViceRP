@@ -2,11 +2,11 @@
   "format_version": 2,
   "header": {
     "name": "Metro Vice RP",
-    "description": "Official Metro Vice RP resource pack — Bedrock foundation",
+    "description": "Official Metro Vice RP Bedrock item textures",
     "uuid": "0c40f53b-53d7-4d8b-8ea7-4e3d5b2a1f61",
     "version": [
       0,
-      1,
+      3,
       0
     ],
     "min_engine_version": [
@@ -20,10 +20,10 @@
       "type": "resources",
       "uuid": "b29b2e88-84a1-4c88-83f6-8f0a76b7b3f2",
       "version": [
-        0,
-        1,
-        0
-      ]
+      0,
+      3,
+      0
+    ]
     }
   ]
 }
