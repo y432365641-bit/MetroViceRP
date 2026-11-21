@@ -2,7 +2,7 @@
 
 The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 
-## Current milestone — Character Core + Banking 0.3.0
+## Current milestone — Character, Banking & Department Duty 0.4.0
 
 ### Character system
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
@@ -37,6 +37,16 @@ Example:
 /character menu
 /character info
 ```
+
+### Police and EMS commands
+- `/duty [police|ems]` — start/end duty for a department assigned to your active character.
+- `/mvrp hirepolice <player> <rank>` — admin: hire an online player's active character into police.
+- `/mvrp firepolice <player>` — admin: remove the active character from police.
+- `/mvrp hireems <player> <rank>` — admin: hire an online player's active character into EMS.
+- `/mvrp fireems <player>` — admin: remove the active character from EMS.
+- `/mvrp dutylist <police|ems>` — show current on-duty roster and session duration.
+
+Police ranks are configured in the exact hierarchy supplied for Metro Vice RP. EMS ranks remain configurable.
 
 ### Bank commands
 - `/bank balance`
