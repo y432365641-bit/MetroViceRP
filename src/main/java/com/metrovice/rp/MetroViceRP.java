@@ -18,6 +18,7 @@ import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
 import com.metrovice.rp.device.DeviceService;
+import com.metrovice.rp.ems.EmergencyService;
 import org.bukkit.inventory.ItemStack;
 import com.metrovice.rp.inventory.InventoryCommand;
 import com.metrovice.rp.inventory.InventoryListener;
@@ -43,6 +44,7 @@ public final class MetroViceRP extends JavaPlugin {
     private ResourcePackService resourcePackService;
     private InventoryService inventoryService;
     private DeviceService deviceService;
+    private EmergencyService emergencyService;
 
     @Override
     public void onEnable() {
