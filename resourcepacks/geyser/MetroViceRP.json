@@ -12,6 +12,30 @@
           "creative_category": "items"
         }
       }
+    ],
+    "minecraft:writable_book": [
+      {
+        "type": "legacy",
+        "custom_model_data": 61002,
+        "bedrock_identifier": "metrovice:mdt_laptop",
+        "display_name": "Metro Vice Police MDT Laptop",
+        "bedrock_options": {
+          "icon": "mdt_laptop",
+          "creative_category": "items"
+        }
+      }
+    ],
+    "minecraft:lectern": [
+      {
+        "type": "legacy",
+        "custom_model_data": 61003,
+        "bedrock_identifier": "metrovice:rank_laptop",
+        "display_name": "Metro Vice Rank Manager",
+        "bedrock_options": {
+          "icon": "rank_laptop",
+          "creative_category": "items"
+        }
+      }
     ]
   }
 }
