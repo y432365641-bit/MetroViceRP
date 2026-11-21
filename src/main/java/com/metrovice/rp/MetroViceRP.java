@@ -4,6 +4,8 @@ import com.metrovice.rp.character.CharacterCommand;
 import com.metrovice.rp.character.CharacterListener;
 import com.metrovice.rp.character.CharacterService;
 import com.metrovice.rp.character.CharacterStateService;
+import com.metrovice.rp.character.OutfitCommand;
+import com.metrovice.rp.character.OutfitService;
 import com.metrovice.rp.economy.BankCommand;
 import com.metrovice.rp.economy.BankService;
 import com.metrovice.rp.economy.BankNpcListener;
@@ -54,6 +56,8 @@ public final class MetroViceRP extends JavaPlugin {
         }
 
         Objects.requireNonNull(getCommand("character")).setExecutor(new CharacterCommand(this, characterService, characterStates));
+        OutfitService outfitService = new OutfitService(database, characterService);
+        Objects.requireNonNull(getCommand("outfit")).setExecutor(new OutfitCommand(this, outfitService));
         inventoryService = new InventoryService(this, database);
         Objects.requireNonNull(getCommand("inventory")).setExecutor(new InventoryCommand(this, characterService, inventoryService));
         getServer().getPluginManager().registerEvents(new InventoryListener(this, inventoryService, characterService), this);
