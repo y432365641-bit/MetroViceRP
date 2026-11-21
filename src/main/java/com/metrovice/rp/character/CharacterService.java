@@ -107,20 +107,28 @@ public final class CharacterService {
         Connection connection = database.connection();
         connection.setAutoCommit(false);
         try {
-                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM active_characters WHERE owner_uuid=? AND character_id=?")) {
-                    ps.setString(1, owner.toString()); ps.setInt(2, id); ps.executeUpdate();
-                }
-                try (PreparedStatement ps = connection.prepareStatement("DELETE FROM characters WHERE owner_uuid=? AND character_id=?")) {
-                    ps.setString(1, owner.toString()); ps.setInt(2, id);
-                    if (ps.executeUpdate() == 0) throw new IllegalArgumentException("الشخصية غير موجودة بحسابك.");
-                }
-                connection.commit();
-            } catch (Exception ex) {
-                connection.rollback();
-                if (ex instanceof SQLException sql) throw sql;
-                if (ex instanceof IllegalArgumentException arg) throw arg;
-                throw new SQLException(ex);
-        } finally { connection.setAutoCommit(true); }
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "DELETE FROM active_characters WHERE owner_uuid=? AND character_id=?")) {
+                ps.setString(1, owner.toString());
+                ps.setInt(2, id);
+                ps.executeUpdate();
+            }
+            try (PreparedStatement ps = connection.prepareStatement(
+                    "DELETE FROM characters WHERE owner_uuid=? AND character_id=?")) {
+                ps.setString(1, owner.toString());
+                ps.setInt(2, id);
+                if (ps.executeUpdate() == 0)
+                    throw new IllegalArgumentException("الشخصية غير موجودة بحسابك.");
+            }
+            connection.commit();
+        } catch (Exception ex) {
+            connection.rollback();
+            if (ex instanceof SQLException sql) throw sql;
+            if (ex instanceof IllegalArgumentException arg) throw arg;
+            throw new SQLException("Could not delete character", ex);
+        } finally {
+            connection.setAutoCommit(true);
+        }
     }
 
     private boolean isConstraint(SQLException ex) {
