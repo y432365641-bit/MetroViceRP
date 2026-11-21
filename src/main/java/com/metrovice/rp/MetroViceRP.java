@@ -18,6 +18,7 @@ import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.resourcepack.BedrockResourcePackManager;
 import com.metrovice.rp.device.DeviceService;
 import com.metrovice.rp.ems.EmergencyService;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +32,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Objects;
 
@@ -47,16 +49,28 @@ public final class MetroViceRP extends JavaPlugin {
     private DeviceService deviceService;
     private EmergencyService emergencyService;
     private PoliceRankLaptopService policeRankLaptopService;
+    private Path bedrockPackPath;
 
     @Override
     public void onLoad() {
         super.onLoad();
-        com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
+        // Geyser is a declared dependency, so its plugin is loaded first.
+        // Install custom item mappings before Geyser enables, but keep the pack
+        // under MetroViceRP's own data folder for API-based registration.
+        bedrockPackPath = com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
     }
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        try {
+            BedrockResourcePackManager bedrockPacks = new BedrockResourcePackManager(this, bedrockPackPath);
+            bedrockPacks.register();
+        } catch (Exception exception) {
+            getLogger().severe("Could not register MetroViceRP Bedrock pack with Geyser: " + exception.getMessage());
+            getLogger().severe("Bedrock pack delivery is unavailable until the Geyser API registration issue is fixed.");
+        }
+
         try {
             database = new Database(this);
             database.open();
@@ -140,7 +154,7 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.0 RC"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.2"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
             sender.sendMessage(color("&7Custom bag: &ephase 1"));
@@ -148,6 +162,7 @@ public final class MetroViceRP extends JavaPlugin {
             sender.sendMessage(color("&7Police / EMS duty: &aonline"));
             sender.sendMessage(color("&7Phone / Emergency system: &aonline"));
             sender.sendMessage(color("&7Police rank laptop: &aLieutenant+"));
+            sender.sendMessage(color("&7Bedrock resource pack: &aGeyser API"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
             sender.sendMessage(color("&8&m--------------------------------"));
             return true;
@@ -207,7 +222,7 @@ public final class MetroViceRP extends JavaPlugin {
                 String value = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
                 if (args[0].equalsIgnoreCase("setjob")) characterService.setJob(target.getUniqueId(), profile.id(), value);
                 else characterService.setRank(target.getUniqueId(), profile.id(), value);
-                sender.sendMessage(color("&aتم تحديث ملف شخصية " + target.getName() + "."));
+                sender.sendMessage(color("&aتم تحديث بيانات شخصية " + target.getName() + "."));
                 target.sendMessage(color("&aتم تحديث بيانات وظيفتك/رتبتك من الإدارة."));
             } catch (IllegalArgumentException ex) {
                 sender.sendMessage(color("&c" + ex.getMessage()));
@@ -290,7 +305,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             Player targetPlayer = Bukkit.getPlayerExact(args[1]);
             if (targetPlayer == null) {
-                sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا."));
+                sender.sendMessage(color("&cاللاعب غير متصل."));
                 return true;
             }
             var leftovers = targetPlayer.getInventory().addItem(policeLaptop.createLaptop());
