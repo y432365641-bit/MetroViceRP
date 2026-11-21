@@ -27,6 +27,7 @@ public final class PoliceLaptopListener implements Listener {
     public ItemStack createLaptop() {
         ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
         ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(61002);
         meta.setDisplayName(MetroViceRP.color("&9&lPolice MDT Laptop"));
         meta.setLore(List.of(
                 MetroViceRP.color("&7جهاز نظام الشرطة"),
