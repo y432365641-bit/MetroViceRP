@@ -1,17 +1,17 @@
 name: MetroViceRP
-version: 0.1.0
+version: 0.2.0
 main: com.metrovice.rp.MetroViceRP
 api-version: '1.21'
 authors: [Metro Vice RP]
-description: Core roleplay framework for Metro Vice RP.
+description: Character-based roleplay framework for Metro Vice RP.
 commands:
   mvrp:
-    description: MetroViceRP main command
+    description: MetroViceRP core status and administration
     usage: /mvrp [info|reload]
-    permission: metrovice.admin
   character:
-    description: Manage your roleplay characters
-    usage: /character <create|list|select|info>
+    aliases: [char]
+    description: Create and manage isolated roleplay characters
+    usage: /character <create|list|select|info|rename|delete>
 permissions:
   metrovice.admin:
     description: Manage MetroViceRP
