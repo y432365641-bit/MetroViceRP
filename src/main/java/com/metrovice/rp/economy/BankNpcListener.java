@@ -47,7 +47,41 @@ public final class BankNpcListener implements Listener {
             npc.setPersistent(true);
             npc.getPersistentDataContainer().set(npcKey, PersistentDataType.BYTE, (byte) 1);
         });
+        plugin.getConfig().set("bank.employee.enabled", true);
+        plugin.getConfig().set("bank.employee.world", location.getWorld().getName());
+        plugin.getConfig().set("bank.employee.x", location.getX());
+        plugin.getConfig().set("bank.employee.y", location.getY());
+        plugin.getConfig().set("bank.employee.z", location.getZ());
+        plugin.getConfig().set("bank.employee.yaw", location.getYaw());
+        plugin.getConfig().set("bank.employee.pitch", location.getPitch());
+        plugin.getConfig().set("bank.employee.uuid", villager.getUniqueId().toString());
+        plugin.saveConfig();
         return villager;
+    }
+
+    public void restoreEmployee() {
+        if (!plugin.getConfig().getBoolean("bank.employee.enabled", false)) return;
+        String worldName = plugin.getConfig().getString("bank.employee.world", "");
+        if (worldName == null || Bukkit.getWorld(worldName) == null) {
+            plugin.getLogger().warning("Bank employee world is missing; use /mvrp banknpc to place the employee again.");
+            return;
+        }
+        String savedId = plugin.getConfig().getString("bank.employee.uuid", "");
+        if (savedId != null && !savedId.isBlank()) {
+            try {
+                Entity existing = Bukkit.getEntity(java.util.UUID.fromString(savedId));
+                if (existing != null && existing.isValid()) return;
+            } catch (IllegalArgumentException ignored) {
+                plugin.getLogger().warning("Saved bank employee UUID is invalid; creating a replacement.");
+            }
+        }
+        Location location = new Location(Bukkit.getWorld(worldName),
+                plugin.getConfig().getDouble("bank.employee.x"),
+                plugin.getConfig().getDouble("bank.employee.y"),
+                plugin.getConfig().getDouble("bank.employee.z"),
+                (float) plugin.getConfig().getDouble("bank.employee.yaw"),
+                (float) plugin.getConfig().getDouble("bank.employee.pitch"));
+        spawnEmployee(location);
     }
 
     @EventHandler
