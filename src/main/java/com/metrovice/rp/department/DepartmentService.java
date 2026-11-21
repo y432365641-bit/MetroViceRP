@@ -97,7 +97,9 @@ public final class DepartmentService {
     }
 
     public void endAllDuty(UUID owner) throws SQLException {
-        int characterId = activeCharacter(owner).id();
+        CharacterProfile active = characters.active(owner).orElse(null);
+        if (active == null) return;
+        int characterId = active.id();
         long now = System.currentTimeMillis() / 1000L;
         try (PreparedStatement ps = database.connection().prepareStatement("""
                 UPDATE department_memberships
