@@ -41,6 +41,7 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
     public ItemStack createLaptop() {
         ItemStack item = new ItemStack(Material.LECTERN);
         ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(61003);
         meta.setDisplayName(MetroViceRP.color("&d&lPolice Rank Manager"));
         meta.setLore(List.of(
                 MetroViceRP.color("&7حاسوب إدارة رتب الشرطة"),
