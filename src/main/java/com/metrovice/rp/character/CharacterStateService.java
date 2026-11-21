@@ -80,7 +80,7 @@ public final class CharacterStateService {
             player.setHealth(Math.max(1, Math.min(player.getMaxHealth(), health)));
 
             World world = Bukkit.getWorld(worldName);
-            if (world != null && world.equals(player.getWorld())) {
+            if (world != null) {
                 player.teleport(new Location(world, x, y, z, yaw, pitch));
             }
             player.updateInventory();
