@@ -85,6 +85,8 @@ public final class Database {
                   FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
                 )
                 """);
+            ensureColumn("department_memberships", "points", "INTEGER NOT NULL DEFAULT 0");
+
             statement.executeUpdate("""
                 UPDATE department_memberships
                 SET total_duty_seconds = total_duty_seconds +
