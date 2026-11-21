@@ -47,10 +47,12 @@ public final class Database {
                 CREATE TABLE IF NOT EXISTS character_state (
                   character_id INTEGER PRIMARY KEY,
                   state_data BLOB NOT NULL,
+                  state_version INTEGER NOT NULL DEFAULT 2,
                   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                   FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
                 )
                 """);
+            ensureColumn("character_state", "state_version", "INTEGER NOT NULL DEFAULT 1");
         }
     }
 
