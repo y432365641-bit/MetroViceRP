@@ -137,6 +137,19 @@ public final class InventoryService {
         return projected <= max + 0.0001;
     }
 
+    public boolean canPickup(Player player, int characterId, ItemStack incoming) throws SQLException {
+        ItemStack[] contents = load(characterId);
+        if (contents == null) contents = Arrays.copyOf(player.getInventory().getStorageContents(), STORAGE_SIZE);
+        double weight = 0;
+        for (ItemStack current : contents) {
+            if (current != null && !current.getType().isAir()) {
+                weight += unitWeight(current) * current.getAmount();
+            }
+        }
+        double max = Math.max(1, plugin.getConfig().getDouble("inventory.max-weight-kg", 30.0));
+        return weight + unitWeight(incoming) * incoming.getAmount() <= max + 0.0001;
+    }
+
     private double unitWeight(ItemStack item) {
         return Math.max(0, plugin.getConfig().getDouble(
                 "inventory.item-weights." + item.getType().name(), 0.1));
