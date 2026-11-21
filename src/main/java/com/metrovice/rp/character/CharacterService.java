@@ -99,9 +99,9 @@ public final class CharacterService {
     }
 
     public void delete(UUID owner, int id) throws SQLException {
-        try (Connection connection = database.connection()) {
-            connection.setAutoCommit(false);
-            try {
+        Connection connection = database.connection();
+        connection.setAutoCommit(false);
+        try {
                 try (PreparedStatement ps = connection.prepareStatement("DELETE FROM active_characters WHERE owner_uuid=? AND character_id=?")) {
                     ps.setString(1, owner.toString()); ps.setInt(2, id); ps.executeUpdate();
                 }
@@ -115,8 +115,7 @@ public final class CharacterService {
                 if (ex instanceof SQLException sql) throw sql;
                 if (ex instanceof IllegalArgumentException arg) throw arg;
                 throw new SQLException(ex);
-            } finally { connection.setAutoCommit(true); }
-        }
+        } finally { connection.setAutoCommit(true); }
     }
 
     private boolean isConstraint(SQLException ex) {
