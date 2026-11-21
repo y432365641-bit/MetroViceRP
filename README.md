@@ -2,7 +2,7 @@
 
 The custom roleplay framework for **Metro Vice RP** in **Monteri States**.
 
-## Current milestone — Character, Banking & Department Duty 0.4.0
+## Current milestone — Character, Banking, Departments & Police MDT 0.5.0
 
 ### Character system
 - Multiple independent characters per Minecraft UUID (default maximum: 3).
@@ -37,6 +37,12 @@ Example:
 /character menu
 /character info
 ```
+
+### Police MDT
+- Admin gives the in-game laptop with `/mvrp givelaptop <player>`.
+- The laptop opens `/mdt` when used; access is restricted to police characters while on duty.
+- `/mdt roster` — view the current police duty roster.
+- `/mdt search <name>` — search character profiles by name.
 
 ### Police and EMS commands
 - `/duty [police|ems]` — start/end duty for a department assigned to your active character.
