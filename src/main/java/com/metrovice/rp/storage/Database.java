@@ -54,6 +54,25 @@ public final class Database {
                 """);
             ensureColumn("character_state", "state_version", "INTEGER NOT NULL DEFAULT 1");
             statement.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS character_inventory (
+                  character_id INTEGER PRIMARY KEY,
+                  items_blob BLOB NOT NULL,
+                  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
+                )
+                """);
+            statement.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS character_outfits (
+                  outfit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  character_id INTEGER NOT NULL,
+                  outfit_name TEXT NOT NULL,
+                  armor_blob BLOB NOT NULL,
+                  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                  UNIQUE(character_id, outfit_name),
+                  FOREIGN KEY(character_id) REFERENCES characters(character_id) ON DELETE CASCADE
+                )
+                """);
+            statement.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS department_memberships (
                   membership_id INTEGER PRIMARY KEY AUTOINCREMENT,
                   character_id INTEGER NOT NULL,

@@ -77,6 +77,18 @@ public final class CharacterService {
         return result;
     }
 
+    /** Search a citizen by the unique character/identity number shown on the ID card. */
+    public Optional<CharacterProfile> findByIdentityNumber(int identityNumber) throws SQLException {
+        if (identityNumber <= 0) return Optional.empty();
+        try (PreparedStatement ps = database.connection().prepareStatement(
+                "SELECT * FROM characters WHERE character_id=?")) {
+            ps.setInt(1, identityNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(map(rs)) : Optional.empty();
+            }
+        }
+    }
+
     public Optional<CharacterProfile> find(UUID owner, int id) throws SQLException {
         try (PreparedStatement ps = database.connection().prepareStatement(
                 "SELECT * FROM characters WHERE owner_uuid=? AND character_id=?")) {

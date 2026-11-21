@@ -4,6 +4,8 @@ import com.metrovice.rp.character.CharacterCommand;
 import com.metrovice.rp.character.CharacterListener;
 import com.metrovice.rp.character.CharacterService;
 import com.metrovice.rp.character.CharacterStateService;
+import com.metrovice.rp.character.OutfitCommand;
+import com.metrovice.rp.character.OutfitService;
 import com.metrovice.rp.economy.BankCommand;
 import com.metrovice.rp.economy.BankService;
 import com.metrovice.rp.economy.BankNpcListener;
@@ -11,8 +13,17 @@ import com.metrovice.rp.department.DepartmentService;
 import com.metrovice.rp.department.DutyCommand;
 import com.metrovice.rp.police.MdtCommand;
 import com.metrovice.rp.police.PoliceLaptopListener;
+import com.metrovice.rp.police.PoliceRankLaptopService;
+import com.metrovice.rp.police.MdtMenuService;
+import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.device.DeviceService;
+import com.metrovice.rp.ems.EmergencyService;
+import org.bukkit.inventory.ItemStack;
+import com.metrovice.rp.inventory.InventoryCommand;
+import com.metrovice.rp.inventory.InventoryListener;
+import com.metrovice.rp.inventory.InventoryService;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,6 +43,10 @@ public final class MetroViceRP extends JavaPlugin {
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
     private ResourcePackService resourcePackService;
+    private InventoryService inventoryService;
+    private DeviceService deviceService;
+    private EmergencyService emergencyService;
+    private PoliceRankLaptopService policeRankLaptopService;
 
     @Override
     public void onEnable() {
@@ -50,18 +65,32 @@ public final class MetroViceRP extends JavaPlugin {
         }
 
         Objects.requireNonNull(getCommand("character")).setExecutor(new CharacterCommand(this, characterService, characterStates));
+        OutfitService outfitService = new OutfitService(database, characterService);
+        Objects.requireNonNull(getCommand("outfit")).setExecutor(new OutfitCommand(this, outfitService));
+        inventoryService = new InventoryService(this, database);
+        Objects.requireNonNull(getCommand("inventory")).setExecutor(new InventoryCommand(this, characterService, inventoryService));
+        getServer().getPluginManager().registerEvents(new InventoryListener(this, inventoryService, characterService), this);
         Objects.requireNonNull(getCommand("mvrp")).setExecutor(this);
         Objects.requireNonNull(getCommand("bank")).setExecutor(new BankCommand(this, bankService));
         bankNpcListener = new BankNpcListener(this, bankService);
         getServer().getPluginManager().registerEvents(bankNpcListener, this);
         bankNpcListener.restoreEmployee();
         Objects.requireNonNull(getCommand("duty")).setExecutor(new DutyCommand(this, departmentService));
-        Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService));
+        MdtMenuService mdtMenus = new MdtMenuService(this, characterService, departmentService);
+        Objects.requireNonNull(getCommand("mdt")).setExecutor(new MdtCommand(this, characterService, departmentService, mdtMenus));
+        getServer().getPluginManager().registerEvents(new MdtMenuListener(this, mdtMenus, departmentService), this);
+        deviceService = new DeviceService(this, characterService, departmentService);
+        getServer().getPluginManager().registerEvents(deviceService, this);
+        Objects.requireNonNull(getCommand("radio")).setExecutor((sender, command, label, args) -> {
+            if (!(sender instanceof Player player)) { sender.sendMessage("This command can only be used in-game."); return true; }
+            return deviceService.sendRadioMessage(player, String.join(" ", args));
+        });
         resourcePackService = new ResourcePackService(this);
         getServer().getPluginManager().registerEvents(resourcePackService, this);
         policeLaptop = new PoliceLaptopListener(this);
         getServer().getPluginManager().registerEvents(policeLaptop, this);
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates, departmentService), this);
+        getServer().getPluginManager().registerEvents(new PlayerNameVisibilityListener(this), this);
 
         // Periodic persistence protects character inventories if the server stops unexpectedly.
         getServer().getScheduler().runTaskTimer(this, this::saveOnlineCharacters, 1200L, 1200L);
@@ -99,9 +128,10 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.7.0"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.8.2"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
+            sender.sendMessage(color("&7Custom bag: &ephase 1"));
             sender.sendMessage(color("&7Banking: &aonline"));
             sender.sendMessage(color("&7Police / EMS duty: &aonline"));
             sender.sendMessage(color("&7Storage: &aSQLite"));
@@ -216,6 +246,18 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
+        if (args[0].equalsIgnoreCase("givephone") || args[0].equalsIgnoreCase("giveradio")) {
+            if (!sender.hasPermission("metrovice.admin")) { sender.sendMessage(color("&cليس لديك صلاحية.")); return true; }
+            if (args.length != 2) { sender.sendMessage(color("&c/mvrp givephone <player> أو /mvrp giveradio <player>")); return true; }
+            Player targetPlayer = Bukkit.getPlayerExact(args[1]);
+            if (targetPlayer == null) { sender.sendMessage(color("&cاللاعب يجب أن يكون متصلًا.")); return true; }
+            ItemStack device = args[0].equalsIgnoreCase("givephone") ? deviceService.createPhone() : deviceService.createRadio();
+            var leftovers = targetPlayer.getInventory().addItem(device);
+            if (!leftovers.isEmpty()) { sender.sendMessage(color("&cمخزون اللاعب ممتلئ.")); return true; }
+            sender.sendMessage(color("&aتم تسليم الجهاز إلى " + targetPlayer.getName()));
+            targetPlayer.sendMessage(color("&bاستلمت جهاز Metro Vice RP جديدًا."));
+            return true;
+        }
         if (args[0].equalsIgnoreCase("banknpc")) {
             if (!sender.hasPermission("metrovice.admin")) { sender.sendMessage(color("&cليس لديك صلاحية.")); return true; }
             if (!(sender instanceof Player player)) { sender.sendMessage("Only an in-game player can place the bank employee."); return true; }
@@ -277,7 +319,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
             return true;
         }
-        sender.sendMessage(color("&cالاستخدام: /mvrp [info|pack|pack send <player>|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc|mdt]"));
+        sender.sendMessage(color("&cالاستخدام: /mvrp [info|pack|pack send <player>|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|givephone|giveradio|banknpc|mdt|radio]"));
         return true;
     }
 

@@ -31,13 +31,13 @@ public final class CharacterListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             if (!player.isOnline()) return;
             try {
+                // Restore the last selected character's saved state, but always show the
+                // character selector so the player can choose another character each login.
                 CharacterProfile active = characters.active(player.getUniqueId()).orElse(null);
-                if (active != null) {
-                    states.load(player, active.id());
-                    return;
-                }
-                player.sendMessage(MetroViceRP.color("&bأهلًا بك في Metro Vice RP!"));
-                player.sendMessage(MetroViceRP.color("&7اختر شخصيتك أو أنشئ شخصيتك الأولى للبدء."));
+                if (active != null) states.load(player, active.id());
+
+                player.sendMessage(MetroViceRP.color("&bأهلًا بك مجددًا في Metro Vice RP!"));
+                player.sendMessage(MetroViceRP.color("&7اختر الشخصية التي تريد دخول المدينة بها."));
                 CharacterMenu.open(plugin, characters, player);
             } catch (SQLException ex) {
                 plugin.getLogger().severe("Could not initialize joining player's character: " + ex.getMessage());
@@ -78,7 +78,8 @@ public final class CharacterListener implements Listener {
                     .orElseThrow(() -> new IllegalArgumentException("هذه الشخصية ليست ملكك."));
             CharacterProfile previous = characters.active(player.getUniqueId()).orElse(null);
             if (previous != null && previous.id() == target.id()) {
-                player.sendMessage(MetroViceRP.color("&eهذه الشخصية مفعلة بالفعل."));
+                player.closeInventory();
+                player.sendMessage(MetroViceRP.color("&aتم دخول المدينة بشخصية &f" + target.name()));
                 return;
             }
             if (previous != null) states.save(player, previous.id());

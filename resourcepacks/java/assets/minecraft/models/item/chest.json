@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:item/chest"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 61001
+      },
+      "model": "metrovice:item/medical_bag"
+    }
+  ]
+}

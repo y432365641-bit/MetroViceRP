@@ -1,0 +1,41 @@
+{
+  "format_version": 2,
+  "items": {
+    "minecraft:chest": [
+      {
+        "type": "legacy",
+        "custom_model_data": 61001,
+        "bedrock_identifier": "metrovice:medical_bag",
+        "display_name": "Metro Vice Medical Bag",
+        "bedrock_options": {
+          "icon": "medical_bag",
+          "creative_category": "items"
+        }
+      }
+    ],
+    "minecraft:writable_book": [
+      {
+        "type": "legacy",
+        "custom_model_data": 61002,
+        "bedrock_identifier": "metrovice:mdt_laptop",
+        "display_name": "Metro Vice Police MDT Laptop",
+        "bedrock_options": {
+          "icon": "mdt_laptop",
+          "creative_category": "items"
+        }
+      }
+    ],
+    "minecraft:lectern": [
+      {
+        "type": "legacy",
+        "custom_model_data": 61003,
+        "bedrock_identifier": "metrovice:rank_laptop",
+        "display_name": "Metro Vice Rank Manager",
+        "bedrock_options": {
+          "icon": "rank_laptop",
+          "creative_category": "items"
+        }
+      }
+    ]
+  }
+}

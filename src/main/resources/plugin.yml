@@ -1,5 +1,5 @@
 name: MetroViceRP
-version: 0.7.0
+version: 0.8.2
 main: com.metrovice.rp.MetroViceRP
 api-version: '1.21'
 authors: [Metro Vice RP]
@@ -7,16 +7,27 @@ description: Character-based roleplay framework for Metro Vice RP.
 commands:
   mvrp:
     description: MetroViceRP core status and administration
-    usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|banknpc]
+    usage: /mvrp [info|reload|setjob|setrank|hirepolice|hireems|firepolice|fireems|dutylist|givelaptop|givephone|giveradio|banknpc]
   mdt:
     description: Police mobile data terminal
     usage: /mdt [roster|search <name>]
+  radio:
+    aliases: [r]
+    description: Send a message over the selected Metro Vice radio channel
+    usage: /radio <message>
   duty:
     description: Toggle police or EMS duty status
     usage: /duty [police|ems]
   bank:
     description: Character-linked banking
     usage: /bank <balance|deposit|withdraw|send>
+  inventory:
+    aliases: [bag]
+    description: Open the character custom bag
+    usage: /inventory
+  outfit:
+    description: Save and equip character-specific clothing sets
+    usage: /outfit [list|save <name>|load <name>]
   character:
     aliases: [char]
     description: Create and manage isolated roleplay characters
