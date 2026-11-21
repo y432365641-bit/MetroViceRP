@@ -81,6 +81,9 @@ public final class MetroViceRP extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new MdtMenuListener(this, mdtMenus, departmentService), this);
         deviceService = new DeviceService(this, characterService, departmentService);
         getServer().getPluginManager().registerEvents(deviceService, this);
+        emergencyService = new EmergencyService(this, departmentService, characterService, inventoryService);
+        getServer().getPluginManager().registerEvents(emergencyService, this);
+        Objects.requireNonNull(getCommand("emsbaggive")).setExecutor(emergencyService);
         Objects.requireNonNull(getCommand("radio")).setExecutor((sender, command, label, args) -> {
             if (!(sender instanceof Player player)) { sender.sendMessage("This command can only be used in-game."); return true; }
             return deviceService.sendRadioMessage(player, String.join(" ", args));
@@ -89,6 +92,9 @@ public final class MetroViceRP extends JavaPlugin {
         getServer().getPluginManager().registerEvents(resourcePackService, this);
         policeLaptop = new PoliceLaptopListener(this);
         getServer().getPluginManager().registerEvents(policeLaptop, this);
+        policeRankLaptopService = new PoliceRankLaptopService(this, departmentService);
+        getServer().getPluginManager().registerEvents(policeRankLaptopService, this);
+        Objects.requireNonNull(getCommand("ranklaptopgive")).setExecutor(policeRankLaptopService);
         getServer().getPluginManager().registerEvents(new CharacterListener(this, characterService, characterStates, departmentService), this);
         getServer().getPluginManager().registerEvents(new PlayerNameVisibilityListener(this), this);
 
