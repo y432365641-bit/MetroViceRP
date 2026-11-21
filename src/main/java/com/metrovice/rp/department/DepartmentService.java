@@ -182,9 +182,10 @@ public final class DepartmentService {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     long started = rs.getLong("duty_started_at");
+                    boolean startedIsNull = rs.wasNull();
                     long total = rs.getLong("total_duty_seconds");
                     boolean onDuty = rs.getInt("on_duty") == 1;
-                    if (onDuty && !rs.wasNull()) total += Math.max(0, now - started);
+                    if (onDuty && !startedIsNull) total += Math.max(0, now - started);
                     result.add(new RosterMember(rs.getInt("character_id"), rs.getString("character_name"),
                             rs.getString("rank_name"), dept, onDuty, total));
                 }
