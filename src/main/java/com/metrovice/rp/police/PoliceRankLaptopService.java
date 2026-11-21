@@ -29,6 +29,7 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
     private final NamespacedKey laptopKey;
     private final NamespacedKey characterIdKey;
     private final NamespacedKey rankKey;
+    private final NamespacedKey pointsDeltaKey;
 
     public PoliceRankLaptopService(JavaPlugin plugin, DepartmentService departments) {
         this.plugin = plugin;
@@ -36,6 +37,7 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
         laptopKey = new NamespacedKey(plugin, "police_rank_laptop");
         characterIdKey = new NamespacedKey(plugin, "rank_laptop_character_id");
         rankKey = new NamespacedKey(plugin, "rank_laptop_rank");
+        pointsDeltaKey = new NamespacedKey(plugin, "rank_laptop_points_delta");
     }
 
     public ItemStack createLaptop() {
@@ -90,6 +92,8 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
                 ItemStack entry = button(Material.PLAYER_HEAD, "&f" + member.characterName(),
                         "&7رقم الشخصية: &b" + member.characterId(),
                         "&7الرتبة الحالية: &f" + member.rank(),
+                        "&7النقاط: &e" + member.points(),
+                        "&7اضغط لفتح إدارة الرتبة والنقاط",
                         member.onDuty() ? "&aعلى رأس العمل" : "&7خارج الخدمة");
                 entry.editMeta(meta -> meta.getPersistentDataContainer().set(characterIdKey,
                         PersistentDataType.INTEGER, member.characterId()));
@@ -118,6 +122,10 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
             });
             inv.setItem(slot++, entry);
         }
+        inv.setItem(45, button(Material.GOLD_INGOT, "&6إدارة النقاط",
+                "&7إعطاء نقاط أو خصمها من هذا الفرد"));
+        inv.getItem(45).editMeta(meta -> meta.getPersistentDataContainer()
+                .set(characterIdKey, PersistentDataType.INTEGER, characterId));
         inv.setItem(49, button(Material.ARROW, "&eالعودة للأفراد"));
         player.openInventory(inv);
     }
@@ -125,7 +133,8 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (!(event.getView().getTopInventory().getHolder() instanceof MdtMenuHolder holder)) return;
-        if (!holder.view().equals("rankstaff") && !holder.view().equals("rankchoices")) return;
+        if (!holder.view().equals("rankstaff") && !holder.view().equals("rankchoices")
+                && !holder.view().equals("rankpoints")) return;
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player player) || event.getClickedInventory() != event.getView().getTopInventory()) return;
         if (!hasAuthority(player)) {
@@ -140,8 +149,31 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
             if (item == null || !item.hasItemMeta()) return;
             Integer id = item.getItemMeta().getPersistentDataContainer().get(characterIdKey, PersistentDataType.INTEGER);
             if (id != null) openRanks(player, id);
+        } else if (holder.view().equals("rankpoints")) {
+            if (slot == 49) { openStaff(player); return; }
+            ItemStack item = event.getCurrentItem();
+            if (item == null || !item.hasItemMeta()) return;
+            var data = item.getItemMeta().getPersistentDataContainer();
+            Integer id = data.get(characterIdKey, PersistentDataType.INTEGER);
+            Integer delta = data.get(pointsDeltaKey, PersistentDataType.INTEGER);
+            if (id == null || delta == null) return;
+            try {
+                int total = departments.adjustPointsByCharacterId(id, "POLICE", delta);
+                player.sendMessage(MetroViceRP.color("&aتم تحديث النقاط. الرصيد الحالي: &e" + total));
+                openPoints(player, id);
+            } catch (SQLException | IllegalArgumentException ex) {
+                player.sendMessage(MetroViceRP.color("&cتعذر تحديث النقاط: " + ex.getMessage()));
+            }
         } else {
             if (slot == 49) { openStaff(player); return; }
+            if (slot == 45) {
+                ItemStack selected = event.getCurrentItem();
+                if (selected != null && selected.hasItemMeta()) {
+                    Integer id = selected.getItemMeta().getPersistentDataContainer()
+                            .get(characterIdKey, PersistentDataType.INTEGER);
+                    if (id != null) { openPoints(player, id); return; }
+                }
+            }
             ItemStack item = event.getCurrentItem();
             if (item == null || !item.hasItemMeta()) return;
             var data = item.getItemMeta().getPersistentDataContainer();
@@ -156,6 +188,36 @@ public final class PoliceRankLaptopService implements Listener, CommandExecutor 
                 player.sendMessage(MetroViceRP.color("&cتعذر تغيير الرتبة: " + ex.getMessage()));
             }
         }
+    }
+
+    private void openPoints(Player player, int characterId) {
+        try {
+            int current = departments.pointsByCharacterId(characterId, "POLICE");
+            MdtMenuHolder holder = new MdtMenuHolder("rankpoints");
+            Inventory inv = Bukkit.createInventory(holder, 54, "§1POLICE §8| §6إدارة النقاط");
+            inv.setItem(13, button(Material.PLAYER_HEAD, "&fالشخصية رقم &b" + characterId,
+                    "&7رصيد النقاط الحالي: &e" + current));
+            setPointButton(inv, 20, characterId, 1, Material.LIME_DYE, "&a+1 نقطة");
+            setPointButton(inv, 21, characterId, 5, Material.LIME_CONCRETE, "&a+5 نقاط");
+            setPointButton(inv, 22, characterId, 10, Material.EMERALD, "&a+10 نقاط");
+            setPointButton(inv, 23, characterId, -1, Material.RED_DYE, "&c-1 نقطة");
+            setPointButton(inv, 24, characterId, -5, Material.RED_CONCRETE, "&c-5 نقاط");
+            setPointButton(inv, 25, characterId, -10, Material.REDSTONE, "&c-10 نقاط");
+            inv.setItem(49, button(Material.ARROW, "&eالعودة للأفراد"));
+            player.openInventory(inv);
+        } catch (SQLException | IllegalArgumentException ex) {
+            player.sendMessage(MetroViceRP.color("&cتعذر تحميل رصيد النقاط: " + ex.getMessage()));
+        }
+    }
+
+    private void setPointButton(Inventory inv, int slot, int characterId, int delta,
+                                Material material, String label) {
+        ItemStack item = button(material, label, "&7اضغط لتطبيق التغيير");
+        item.editMeta(meta -> {
+            meta.getPersistentDataContainer().set(characterIdKey, PersistentDataType.INTEGER, characterId);
+            meta.getPersistentDataContainer().set(pointsDeltaKey, PersistentDataType.INTEGER, delta);
+        });
+        inv.setItem(slot, item);
     }
 
     private ItemStack button(Material material, String name, String... lore) {
