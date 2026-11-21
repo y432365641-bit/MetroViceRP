@@ -57,11 +57,11 @@ public final class MdtMenuService {
 
     private void renderRoster(Inventory inv) throws SQLException {
         inv.clear();
-        List<DepartmentService.RosterMember> roster = departments.roster("POLICE");
+        List<DepartmentService.RosterMember> roster = departments.roster("POLICE").stream().filter(DepartmentService.RosterMember::onDuty).toList();
         int slot = 0;
         for (DepartmentService.RosterMember member : roster) {
             if (slot >= 45) break;
-            String status = member.onDuty() ? "§aمسجل دخول بالبصمة" : "§7خارج الخدمة";
+            String status = member.onDuty() ? "§aمسجل دخول" : "§7خارج الخدمة";
             inv.setItem(slot++, item(Material.PLAYER_HEAD, "§f" + member.characterName(),
                     "§7الرتبة: §b" + member.rank(), status,
                     "§7رقم الشخصية: §f" + member.characterId()));
