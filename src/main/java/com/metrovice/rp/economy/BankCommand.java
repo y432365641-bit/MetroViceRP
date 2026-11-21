@@ -24,23 +24,10 @@ public final class BankCommand implements CommandExecutor {
             return true;
         }
         try {
-            if (args.length == 0 || args[0].equalsIgnoreCase("balance")) {
-                BankService.Balance b = bank.balance(player.getUniqueId());
-                player.sendMessage(MetroViceRP.color("&8&m------ &bحسابك البنكي &8&m------"));
-                player.sendMessage(MetroViceRP.color("&fالنقد: &a$" + b.cash()));
-                player.sendMessage(MetroViceRP.color("&fالبنك: &b$" + b.bank()));
-                return true;
-            }
-            if (args[0].equalsIgnoreCase("deposit") || args[0].equalsIgnoreCase("withdraw")) {
-                if (args.length != 2) { help(player); return true; }
-                long amount = parseAmount(args[1]);
-                if (args[0].equalsIgnoreCase("deposit")) {
-                    bank.deposit(player.getUniqueId(), amount);
-                    player.sendMessage(MetroViceRP.color("&aتم إيداع $" + amount + " في البنك."));
-                } else {
-                    bank.withdraw(player.getUniqueId(), amount);
-                    player.sendMessage(MetroViceRP.color("&aتم سحب $" + amount + " من البنك."));
-                }
+            if (args.length == 0 || args[0].equalsIgnoreCase("balance")
+                    || args[0].equalsIgnoreCase("deposit") || args[0].equalsIgnoreCase("withdraw")) {
+                player.sendMessage(MetroViceRP.color("&eلإظهار رصيدك والإيداع والسحب، راجع موظف البنك داخل المدينة."));
+                player.sendMessage(MetroViceRP.color("&7اضغط بزر الفأرة الأيمن على موظف البنك لفتح حسابك."));
                 return true;
             }
             if (args[0].equalsIgnoreCase("send")) {
@@ -70,9 +57,9 @@ public final class BankCommand implements CommandExecutor {
 
     private void help(Player player) {
         player.sendMessage(MetroViceRP.color("&8&m------ &bالبنك &8&m------"));
-        player.sendMessage(MetroViceRP.color("&b/bank balance &7- عرض الرصيد"));
-        player.sendMessage(MetroViceRP.color("&b/bank deposit <amount> &7- إيداع"));
-        player.sendMessage(MetroViceRP.color("&b/bank withdraw <amount> &7- سحب"));
+        player.sendMessage(MetroViceRP.color("&7راجع موظف البنك لإدارة رصيدك."));
+        
+        
         player.sendMessage(MetroViceRP.color("&b/bank send <player> <amount> &7- تحويل للاعب متصل"));
     }
 }
