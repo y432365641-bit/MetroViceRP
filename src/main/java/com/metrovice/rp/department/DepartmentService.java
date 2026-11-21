@@ -14,7 +14,7 @@ import java.util.UUID;
 public final class DepartmentService {
     public record Membership(String department, String rank, boolean onDuty, long totalDutySeconds, Long dutyStartedAt) {}
     public record DutyMember(String characterName, String rank, String department, long dutySeconds) {}
-    public record RosterMember(int characterId, String characterName, String rank, String department, boolean onDuty, long dutySeconds) {}
+    public record RosterMember(int characterId, String characterName, String rank, String department, boolean onDuty, long dutySeconds, int points) {}
 
     private final Database database;
     private final CharacterService characters;
@@ -172,7 +172,7 @@ public final class DepartmentService {
         long now = System.currentTimeMillis() / 1000L;
         try (PreparedStatement ps = database.connection().prepareStatement("""
                 SELECT c.character_id, c.character_name, d.rank_name, d.department,
-                       d.on_duty, d.total_duty_seconds, d.duty_started_at
+                       d.on_duty, d.total_duty_seconds, d.duty_started_at, d.points
                 FROM department_memberships d
                 JOIN characters c ON c.character_id=d.character_id
                 WHERE d.department=?
@@ -187,11 +187,41 @@ public final class DepartmentService {
                     boolean onDuty = rs.getInt("on_duty") == 1;
                     if (onDuty && !startedIsNull) total += Math.max(0, now - started);
                     result.add(new RosterMember(rs.getInt("character_id"), rs.getString("character_name"),
-                            rs.getString("rank_name"), dept, onDuty, total));
+                            rs.getString("rank_name"), dept, onDuty, total, rs.getInt("points")));
                 }
             }
         }
         return result;
+    }
+
+    public int pointsByCharacterId(int characterId, String department) throws SQLException {
+        String dept = normalizeDepartment(department);
+        try (PreparedStatement ps = database.connection().prepareStatement(
+                "SELECT points FROM department_memberships WHERE character_id=? AND department=?")) {
+            ps.setInt(1, characterId);
+            ps.setString(2, dept);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) throw new IllegalArgumentException("لا توجد عضوية بهذا الرقم في القسم.");
+                return rs.getInt("points");
+            }
+        }
+    }
+
+    public int adjustPointsByCharacterId(int characterId, String department, int delta) throws SQLException {
+        String dept = normalizeDepartment(department);
+        if (delta == 0 || Math.abs((long) delta) > 1000)
+            throw new IllegalArgumentException("قيمة النقاط يجب أن تكون بين 1 و1000.");
+        try (PreparedStatement ps = database.connection().prepareStatement("""
+                UPDATE department_memberships
+                SET points=MAX(0, points + ?)
+                WHERE character_id=? AND department=?
+                """)) {
+            ps.setInt(1, delta);
+            ps.setInt(2, characterId);
+            ps.setString(3, dept);
+            if (ps.executeUpdate() == 0) throw new IllegalArgumentException("لا توجد عضوية بهذا الرقم في القسم.");
+        }
+        return pointsByCharacterId(characterId, dept);
     }
 
     public List<DutyMember> onDuty(String department) throws SQLException {
