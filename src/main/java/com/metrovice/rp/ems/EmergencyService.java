@@ -79,6 +79,7 @@ public final class EmergencyService implements Listener, CommandExecutor {
         long until = System.currentTimeMillis() / 1000L + downedSeconds();
         downedUntil.put(player.getUniqueId(), until);
         bleedoutReady.put(player.getUniqueId(), false);
+        player.closeInventory();
         player.setHealth(Math.min(2.0, player.getMaxHealth()));
         player.setFoodLevel(6);
         player.setInvulnerable(true);
@@ -212,7 +213,17 @@ public final class EmergencyService implements Listener, CommandExecutor {
     }
 
     @EventHandler
+    public void onDownedInventoryClick(org.bukkit.event.inventory.InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player) || !downedUntil.containsKey(player.getUniqueId())) return;
+        if (event.getView().getTopInventory().getHolder() instanceof DeviceMenuHolder holder
+                && (holder.view().equals("phone") || holder.view().equals("ems"))) return;
+        event.setCancelled(true);
+    }
+
+    @EventHandler
     public void onUseMedicalBag(PlayerInteractEvent event) {
+        if (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR
+                && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
         ItemStack held = event.getItem();
         if (held == null || !held.hasItemMeta()
                 || !held.getItemMeta().getPersistentDataContainer().has(medBagKey, PersistentDataType.BYTE)) return;
