@@ -1,6 +1,7 @@
 package com.metrovice.rp.character;
 
 import com.metrovice.rp.MetroViceRP;
+import com.metrovice.rp.department.DepartmentService;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,9 +19,10 @@ public final class CharacterListener implements Listener {
     private final MetroViceRP plugin;
     private final CharacterService characters;
     private final CharacterStateService states;
+    private final DepartmentService departments;
 
-    public CharacterListener(MetroViceRP plugin, CharacterService characters, CharacterStateService states) {
-        this.plugin = plugin; this.characters = characters; this.states = states;
+    public CharacterListener(MetroViceRP plugin, CharacterService characters, CharacterStateService states, DepartmentService departments) {
+        this.plugin = plugin; this.characters = characters; this.states = states; this.departments = departments;
     }
 
     @EventHandler
@@ -41,6 +43,8 @@ public final class CharacterListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        try { departments.endAllDuty(player.getUniqueId()); }
+        catch (SQLException ex) { plugin.getLogger().severe("Could not close duty session: " + ex.getMessage()); }
         try {
             characters.active(player.getUniqueId()).ifPresent(profile -> {
                 try { states.save(player, profile.id()); }
