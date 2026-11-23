@@ -4,6 +4,7 @@ on:
     branches:
       - feature/police-duty-ranks-resourcepack
       - feature/bedrock-geyser-api-pack-manager
+      - feature/embedded-resource-pack-delivery
       - feature/core-systems
       - main
   workflow_dispatch:
@@ -25,7 +26,7 @@ jobs:
       - name: Upload plugin JAR
         uses: actions/upload-artifact@v4
         with:
-          name: MetroViceRP-Plugin-0.9.4
+          name: MetroViceRP-Plugin-0.9.5
           path: target/MetroViceRP.jar
           if-no-files-found: error
           retention-days: 90
