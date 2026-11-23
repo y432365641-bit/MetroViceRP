@@ -52,13 +52,22 @@ inventory:
     OAK_LOG: 0.5
     COOKED_BEEF: 0.2
 
+# Both edition packs are embedded in MetroViceRP.jar.
+# Bedrock: MetroViceRP installs the .mcpack and Geyser item mappings automatically.
+# Java: MetroViceRP serves the embedded ZIP itself; only an additional public TCP
+# port allocation is needed. No manual pack upload to a file host is required.
 resource-pack:
-  enabled: false
-  url: ""
-  sha1: ""
+  enabled: true
   required: false
   auto-send-on-join: true
   prompt: "Metro Vice RP - حزمة الموارد الرسمية"
+  java-server:
+    enabled: true
+    bind-address: "0.0.0.0"
+    port: 8085
+    # Set this to the public address of the extra TCP port allocated by your host.
+    # Example: "http://YOUR_SERVER_IP:8085" (do not add the ZIP filename).
+    public-url: ""
 
 # EMS / downed-player system. Empty world uses the first loaded world's spawn.
 ems:
