@@ -11,12 +11,14 @@ import org.geysermc.geyser.api.pack.option.ResourcePackOption;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 
 /**
  * MetroViceRP-owned Bedrock resource-pack bridge.
  *
- * Geyser remains the Bedrock protocol implementation. This class owns the
- * MetroViceRP pack file and registers it with every new Bedrock session.
+ * Geyser remains responsible for the Bedrock protocol. This class registers
+ * the pack for each new Bedrock session while avoiding duplicate UUIDs that
+ * may already have been added by Geyser or another compatible plugin.
  */
 public final class BedrockResourcePackManager implements EventRegistrar {
     private static final int MAX_ATTEMPTS = 60;
@@ -32,9 +34,8 @@ public final class BedrockResourcePackManager implements EventRegistrar {
     }
 
     /**
-     * Waits for Geyser's API to become available. Some server hosts enable
-     * plugins in an order where Geyser finishes its bootstrap after this
-     * plugin's onEnable callback.
+     * Wait for Geyser's API to become available. On some hosts Geyser finishes
+     * enabling after this plugin's onEnable callback.
      */
     public void register() {
         if (packPath == null || !Files.isRegularFile(packPath)) {
@@ -69,6 +70,7 @@ public final class BedrockResourcePackManager implements EventRegistrar {
 
                     registered = true;
                     plugin.getLogger().info("Bedrock pack bridge is ready. Waiting for Bedrock sessions.");
+                    plugin.getLogger().info("Pack UUID: " + resourcePack.uuid());
                     plugin.getLogger().info("Pack file: " + packPath.toAbsolutePath());
                     cancel();
                 } catch (Throwable exception) {
@@ -99,11 +101,29 @@ public final class BedrockResourcePackManager implements EventRegistrar {
             return;
         }
 
+        UUID targetUuid = resourcePack.uuid();
+        boolean alreadyQueued = event.resourcePacks().stream()
+                .anyMatch(existing -> targetUuid.equals(existing.uuid()));
+
+        if (alreadyQueued) {
+            plugin.getLogger().fine("MetroViceRP Bedrock pack is already queued for this session (UUID "
+                    + targetUuid + "); skipping duplicate registration.");
+            return;
+        }
+
         try {
-            // Pass an empty options array to select the non-deprecated API overload.
             event.register(resourcePack, new ResourcePackOption<?>[0]);
             plugin.getLogger().info("Added MetroViceRP Bedrock pack to a connecting Bedrock session.");
         } catch (Exception exception) {
+            boolean registeredByAnotherListener = event.resourcePacks().stream()
+                    .anyMatch(existing -> targetUuid.equals(existing.uuid()));
+
+            if (registeredByAnotherListener) {
+                plugin.getLogger().fine("MetroViceRP Bedrock pack was already registered by another listener "
+                        + "for this session; continuing without a duplicate.");
+                return;
+            }
+
             plugin.getLogger().severe("Could not add MetroViceRP pack to a Bedrock session: "
                     + exception.getClass().getSimpleName() + ": " + exception.getMessage());
         }
