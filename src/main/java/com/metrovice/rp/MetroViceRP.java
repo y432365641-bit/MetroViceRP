@@ -148,7 +148,7 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.2"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.5"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
             sender.sendMessage(color("&7Custom bag: &ephase 1"));
