@@ -7,49 +7,59 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.Locale;
-import java.util.regex.Pattern;
+import org.geysermc.geyser.api.GeyserApi;
 
 public final class ResourcePackService implements Listener {
-    private static final Pattern SHA1 = Pattern.compile("^[a-f0-9]{40}$");
     private final JavaPlugin plugin;
+    private final EmbeddedJavaPackServer javaPackServer;
 
-    public ResourcePackService(JavaPlugin plugin) {
+    public ResourcePackService(JavaPlugin plugin, EmbeddedJavaPackServer javaPackServer) {
         this.plugin = plugin;
+        this.javaPackServer = javaPackServer;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         if (!plugin.getConfig().getBoolean("resource-pack.auto-send-on-join", true)) return;
-        Bukkit.getScheduler().runTaskLater(plugin, () -> send(event.getPlayer()), 40L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (event.getPlayer().isOnline()) send(event.getPlayer());
+        }, 40L);
     }
 
     public void send(Player player) {
-        if (!plugin.getConfig().getBoolean("resource-pack.enabled", false)) {
-            player.sendMessage("§cحزمة Metro Vice RP غير مفعّلة في إعدادات البلجن بعد.");
+        if (!plugin.getConfig().getBoolean("resource-pack.enabled", true)) {
+            player.sendMessage("§cحزمة Metro Vice RP غير مفعّلة في إعدادات البلجن.");
             return;
         }
 
-        String url = plugin.getConfig().getString("resource-pack.url", "").trim();
-        String hash = plugin.getConfig().getString("resource-pack.sha1", "").trim().toLowerCase(Locale.ROOT);
-        if (url.isEmpty() || !url.startsWith("https://")) {
-            player.sendMessage("§cرابط حزمة الموارد غير مضبوط. يجب إضافة رابط HTTPS مباشر لملف ZIP.");
+        // Bedrock clients receive the separate .mcpack through Geyser's pack
+        // handshake. Never send the Java ZIP to a Bedrock client.
+        GeyserApi geyser = GeyserApi.api();
+        if (geyser == null) {
+            plugin.getLogger().warning("Geyser API is not ready; resource pack was not sent to " + player.getName());
+            player.sendMessage("§cنظام حزمة الموارد غير جاهز حالياً. حاول لاحقاً.");
             return;
         }
-        if (!SHA1.matcher(hash).matches()) {
-            player.sendMessage("§cبصمة SHA-1 غير صحيحة. يجب أن تتكون من 40 رمزًا سداسيًا صغيرًا.");
+        if (geyser.isBedrockPlayer(player.getUniqueId())) {
+            player.sendMessage("§bحزمة Bedrock تُدار تلقائياً عبر Geyser عند دخولك.");
+            return;
+        }
+
+        if (javaPackServer == null || !javaPackServer.isReady()) {
+            player.sendMessage("§cحزمة Java غير جاهزة. راجع إعداد public-url ومنفذ الحزمة في config.yml.");
             return;
         }
 
         boolean required = plugin.getConfig().getBoolean("resource-pack.required", false);
         String prompt = plugin.getConfig().getString("resource-pack.prompt", "Metro Vice RP");
         try {
-            player.setResourcePack(url, hash, required, Component.text(prompt));
+            player.setResourcePack(javaPackServer.downloadUrl(), javaPackServer.sha1(),
+                    required, Component.text(prompt));
             player.sendMessage("§bتم إرسال طلب تحميل حزمة Metro Vice RP.");
         } catch (IllegalArgumentException exception) {
-            plugin.getLogger().warning("Could not send resource pack to " + player.getName() + ": " + exception.getMessage());
-            player.sendMessage("§cتعذر إرسال حزمة الموارد. راجع الرابط وبصمة SHA-1 في config.yml.");
+            plugin.getLogger().warning("Could not send resource pack to " + player.getName() + ": "
+                    + exception.getMessage());
+            player.sendMessage("§cتعذر إرسال طلب الحزمة. تحقق من رابط التنزيل العام.");
         }
     }
 }
