@@ -18,6 +18,7 @@ import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.resourcepack.EmbeddedJavaPackServer;
 import com.metrovice.rp.device.DeviceService;
 import com.metrovice.rp.ems.EmergencyService;
 import org.bukkit.inventory.ItemStack;
@@ -44,6 +45,7 @@ public final class MetroViceRP extends JavaPlugin {
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
     private ResourcePackService resourcePackService;
+    private EmbeddedJavaPackServer javaPackServer;
     private InventoryService inventoryService;
     private DeviceService deviceService;
     private EmergencyService emergencyService;
@@ -97,7 +99,9 @@ public final class MetroViceRP extends JavaPlugin {
             if (!(sender instanceof Player player)) { sender.sendMessage("This command can only be used in-game."); return true; }
             return deviceService.sendRadioMessage(player, String.join(" ", args));
         });
-        resourcePackService = new ResourcePackService(this);
+        javaPackServer = new EmbeddedJavaPackServer(this);
+        javaPackServer.start();
+        resourcePackService = new ResourcePackService(this, javaPackServer);
         getServer().getPluginManager().registerEvents(resourcePackService, this);
         policeLaptop = new PoliceLaptopListener(this);
         getServer().getPluginManager().registerEvents(policeLaptop, this);
@@ -121,6 +125,7 @@ public final class MetroViceRP extends JavaPlugin {
             }
         }
         saveOnlineCharacters();
+        if (javaPackServer != null) javaPackServer.stop();
         if (database != null) database.close();
     }
 
@@ -143,7 +148,7 @@ public final class MetroViceRP extends JavaPlugin {
         if (!command.getName().equalsIgnoreCase("mvrp")) return false;
         if (args.length == 0 || args[0].equalsIgnoreCase("info")) {
             sender.sendMessage(color("&8&m--------------------------------"));
-            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.2"));
+            sender.sendMessage(color("&b&lMETRO &d&lVICE &fRP &7- Core 0.9.5"));
             sender.sendMessage(color("&7Character profiles: &aonline"));
             sender.sendMessage(color("&7Isolated inventory state: &aonline"));
             sender.sendMessage(color("&7Custom bag: &ephase 1"));
