@@ -18,6 +18,8 @@ import com.metrovice.rp.police.MdtMenuService;
 import com.metrovice.rp.police.MdtMenuListener;
 import com.metrovice.rp.storage.Database;
 import com.metrovice.rp.resourcepack.ResourcePackService;
+import com.metrovice.rp.resourcepack.BedrockResourcePackManager;
+import com.metrovice.rp.resourcepack.EmbeddedGeyserPack;
 import com.metrovice.rp.resourcepack.EmbeddedJavaPackServer;
 import com.metrovice.rp.device.DeviceService;
 import com.metrovice.rp.ems.EmergencyService;
@@ -45,6 +47,7 @@ public final class MetroViceRP extends JavaPlugin {
     private DepartmentService departmentService;
     private PoliceLaptopListener policeLaptop;
     private ResourcePackService resourcePackService;
+    private BedrockResourcePackManager bedrockResourcePackManager;
     private EmbeddedJavaPackServer javaPackServer;
     private InventoryService inventoryService;
     private DeviceService deviceService;
@@ -52,16 +55,18 @@ public final class MetroViceRP extends JavaPlugin {
     private PoliceRankLaptopService policeRankLaptopService;
 
     @Override
-    public void onLoad() {
-        super.onLoad();
-        // Geyser is a declared dependency. Install the Bedrock pack into
-        // Geyser's native packs folder before its onEnable scans that folder.
-        com.metrovice.rp.resourcepack.EmbeddedGeyserPack.install(this);
-    }
-
-    @Override
     public void onEnable() {
         saveDefaultConfig();
+
+        // The Bedrock .mcpack stays in MetroViceRP's data folder and is
+        // registered per session through the official Geyser API.
+        Path embeddedBedrockPack = EmbeddedGeyserPack.install(this);
+        if (embeddedBedrockPack != null) {
+            bedrockResourcePackManager = new BedrockResourcePackManager(this, embeddedBedrockPack);
+            bedrockResourcePackManager.register();
+        } else {
+            getLogger().severe("Bedrock resource-pack manager was not started because extraction failed.");
+        }
         try {
             database = new Database(this);
             database.open();
