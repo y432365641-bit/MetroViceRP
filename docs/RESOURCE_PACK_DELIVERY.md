@@ -1,14 +1,22 @@
 # MetroViceRP resource-pack delivery
 
-Both edition-specific packs are packaged into the plugin JAR during the Maven build.
+Both edition-specific resource packs are embedded into `MetroViceRP.jar` during the Maven build.
 
 ## Bedrock Edition
 
-On plugin load, MetroViceRP copies the embedded Bedrock `.mcpack` and its Geyser custom-item mapping into Geyser's folders. This is automatic; server owners do not manually upload or copy the pack. Geyser remains responsible for the Bedrock resource-pack handshake.
+MetroViceRP extracts the embedded Bedrock `.mcpack` into its own plugin data directory:
+
+`plugins/MetroViceRP/resourcepacks/MetroViceRP-Bedrock.mcpack`
+
+The plugin-owned `BedrockResourcePackManager` loads that file with Geyser's `PackCodec.path(...)` and registers it for each connecting Bedrock session through `SessionLoadResourcePacksEvent`.
+
+The Bedrock pack itself is **not copied to** `plugins/Geyser-Spigot/packs/`, and it does not need an external file host or a manually uploaded file. Geyser remains the Bedrock protocol transport because it owns the Bedrock connection. MetroViceRP owns the embedded pack, extraction, validation path, registration, and delivery logging.
+
+The separate `MetroViceRP.json` custom-item mapping may be installed into Geyser's `custom_mappings` directory. This is a mapping definition, not the resource-pack archive.
 
 ## Java Edition
 
-Java clients require an HTTP(S) download URL. MetroViceRP now serves the ZIP embedded in its JAR using a small built-in HTTP server.
+Java clients require a publicly reachable HTTP(S) download URL. MetroViceRP can serve the ZIP embedded in its JAR using its built-in HTTP server.
 
 1. Allocate one additional public TCP port in the game-host panel.
 2. Set `resource-pack.java-server.port` to that allocated port.
@@ -18,4 +26,8 @@ Java clients require an HTTP(S) download URL. MetroViceRP now serves the ZIP emb
 
 No resource-pack file needs to be uploaded to an external file host. If the host cannot allocate an additional public TCP port, Java pack delivery from the plugin alone is not possible; the client must have a publicly reachable HTTP(S) URL.
 
-Bedrock players are excluded from Java pack delivery and receive only the Bedrock pack through Geyser.
+Bedrock players must be excluded from Java pack delivery and receive only the Bedrock pack through the per-session Geyser API registration described above.
+
+## Validation status
+
+The source integration is present, but it is not considered verified until the project builds successfully and a real Bedrock client downloads/accepts the pack. A log that the pack was registered only confirms registration, not client acceptance or successful application.
